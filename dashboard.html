@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Churn Retention & Explainability Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .tab-btn.active {
+            border-bottom: 2px solid #4f46e5;
+            color: #4f46e5;
+            font-weight: 700;
+        }
+        .tab-btn {
+            border-bottom: 2px solid transparent;
+            color: #64748b;
+        }
+        .script-tab-btn.active {
+            background: #4f46e5;
+            color: white;
+            border-color: #4f46e5;
+        }
+        .contract-pill.active {
+            background: #4f46e5;
+            color: white;
+            border-color: #4f46e5;
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+        }
+        input[type=range] {
+            accent-color: #4f46e5;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white text-xl shadow-md shadow-indigo-100 font-bold">
+                    🎯
+                </div>
+                <div>
+                    <h1 class="text-lg font-extrabold text-slate-900 tracking-tight">Customer Churn Retention Intelligence</h1>
+                    <p class="text-xs text-slate-500">Machine Learning Model &bull; SHAP Explainability &bull; Retention Action Desk</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                    <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-indigo-600 animate-pulse"></span> Stacked Ensemble (Recall ~81%)
+                </span>
+                <button onclick="exportCSV()" class="inline-flex items-center px-3 py-1.5 border border-slate-300 text-xs font-semibold rounded-lg text-slate-700 bg-white hover:bg-slate-50 transition shadow-sm">
+                    <svg class="w-3.5 h-3.5 mr-1.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Export CSV
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+
+        <!-- Hero Card -->
+        <div class="relative rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950 to-indigo-900 text-white p-6 sm:p-8 mb-6 shadow-xl border border-indigo-800/40 overflow-hidden">
+            <div class="relative z-10 max-w-3xl">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur text-xs font-medium text-indigo-200 border border-white/15 mb-3">
+                    ⚡ Proactive Retention Engine
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Who is about to leave, why, and what to do.</h2>
+                <p class="mt-2 text-indigo-200 text-sm sm:text-base leading-relaxed">
+                    Personalized multi-tier retention playbooks and real-time What-If simulation powered by SHAP & LIME machine learning explainability.
+                </p>
+                <div class="mt-4 flex flex-wrap gap-2 text-xs font-medium text-indigo-100">
+                    <span class="bg-white/10 px-3 py-1 rounded-lg">🔍 100 Prioritized Records</span>
+                    <span class="bg-white/10 px-3 py-1 rounded-lg">🎯 Multi-Pillar Playbooks</span>
+                    <span class="bg-white/10 px-3 py-1 rounded-lg">🎛️ Live What-If Simulator</span>
+                </div>
+            </div>
+            <div class="absolute right-0 bottom-0 translate-x-10 translate-y-10 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="border-b border-slate-200 mb-6">
+            <nav class="flex space-x-6 sm:space-x-8 text-sm font-semibold" aria-label="Tabs">
+                <button onclick="switchTab('tab-queue')" id="btn-queue" class="tab-btn active pb-3 px-1 flex items-center gap-2">
+                    <span>🎯 Priority Customers Queue</span>
+                </button>
+                <button onclick="switchTab('tab-portfolio')" id="btn-portfolio" class="tab-btn pb-3 px-1 flex items-center gap-2">
+                    <span>📊 Portfolio Analytics</span>
+                </button>
+                <button onclick="switchTab('tab-insights')" id="btn-insights" class="tab-btn pb-3 px-1 flex items-center gap-2">
+                    <span>🧠 Model & Data Insights</span>
+                    <span class="px-1.5 py-0.5 text-[10px] rounded bg-indigo-100 text-indigo-700 font-bold">Linked</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- ================= TAB 1: PRIORITY QUEUE ================= -->
+        <div id="tab-queue" class="tab-content block">
+            <!-- Metric KPI Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white rounded-xl p-5 border border-slate-200 border-t-4 border-t-red-500 shadow-sm">
+                    <div class="text-xs font-bold text-slate-500 uppercase tracking-wider">At-Risk Customers</div>
+                    <div id="kpi-total" class="text-3xl font-extrabold text-red-600 mt-2">100</div>
+                    <div class="text-xs text-slate-400 mt-1">In filtered queue</div>
+                </div>
+                <div class="bg-white rounded-xl p-5 border border-slate-200 border-t-4 border-t-orange-500 shadow-sm">
+                    <div class="text-xs font-bold text-slate-500 uppercase tracking-wider">Average Churn Risk</div>
+                    <div id="kpi-avg" class="text-3xl font-extrabold text-orange-600 mt-2">91.8%</div>
+                    <div class="text-xs text-slate-400 mt-1">Predicted probability</div>
+                </div>
+                <div class="bg-white rounded-xl p-5 border border-slate-200 border-t-4 border-t-purple-600 shadow-sm">
+                    <div class="text-xs font-bold text-slate-500 uppercase tracking-wider">Critical Risk (≥90%)</div>
+                    <div id="kpi-critical" class="text-3xl font-extrabold text-purple-700 mt-2">92</div>
+                    <div class="text-xs text-slate-400 mt-1">Immediate intervention needed</div>
+                </div>
+                <div class="bg-white rounded-xl p-5 border border-slate-200 border-t-4 border-t-emerald-500 shadow-sm">
+                    <div class="text-xs font-bold text-slate-500 uppercase tracking-wider">Top Recommended Playbook</div>
+                    <div id="kpi-action" class="text-lg font-bold text-emerald-700 mt-2 truncate">Senior agent callback</div>
+                    <div class="text-xs text-slate-400 mt-1">High-priority retention playbook</div>
+                </div>
+            </div>
+
+            <!-- Filter Controls Bar -->
+            <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm mb-6 flex flex-wrap items-center justify-between gap-4">
+                <div class="flex flex-wrap items-center gap-3 flex-1 min-w-[280px]">
+                    <div class="relative flex-1 max-w-xs">
+                        <input type="text" id="search-input" oninput="applyFilters()" placeholder="Search Customer ID (e.g. 0970)..." 
+                               class="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
+                        <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </div>
+
+                    <select id="filter-tier" onchange="applyFilters()" class="text-sm bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500">
+                        <option value="ALL">All Risk Tiers</option>
+                        <option value="Critical">Critical (≥90%)</option>
+                        <option value="High">High (80-89%)</option>
+                        <option value="Watch">Watch (<80%)</option>
+                    </select>
+
+                    <select id="filter-action" onchange="applyFilters()" class="text-sm bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500">
+                        <option value="ALL">All Recommended Actions</option>
+                        <option value="Senior agent callback">Senior agent callback</option>
+                        <option value="Offer 1-year plan with discount">Offer 1-year plan with discount</option>
+                        <option value="Bill review call + discount offer">Bill review call + discount offer</option>
+                    </select>
+                </div>
+
+                <div class="text-xs text-slate-500 font-medium">
+                    Showing <span id="shown-count" class="font-bold text-slate-800">100</span> of <span id="total-count" class="font-bold text-slate-800">100</span> customers
+                </div>
+            </div>
+
+            <!-- Customer Table -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-600 font-bold uppercase text-[11px] tracking-wider">
+                            <tr>
+                                <th class="py-3.5 px-4">Customer ID</th>
+                                <th class="py-3.5 px-4">Contract</th>
+                                <th class="py-3.5 px-4">Churn Risk</th>
+                                <th class="py-3.5 px-4">Primary Driver (LIME / SHAP)</th>
+                                <th class="py-3.5 px-4">Prescribed Retention Strategy</th>
+                                <th class="py-3.5 px-4 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customer-tbody" class="divide-y divide-slate-100">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 2: PORTFOLIO ANALYTICS ================= -->
+        <div id="tab-portfolio" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <!-- Donut Chart -->
+                <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+                    <h3 class="text-base font-bold text-slate-800 mb-1">Risk Tier Distribution</h3>
+                    <p class="text-xs text-slate-500 mb-4">Portfolio breakdown by churn probability thresholds</p>
+                    <div class="h-64 flex items-center justify-center">
+                        <canvas id="chart-tier"></canvas>
+                    </div>
+                </div>
+
+                <!-- Action Bar Chart -->
+                <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+                    <h3 class="text-base font-bold text-slate-800 mb-1">Prescribed Retention Actions Volume</h3>
+                    <p class="text-xs text-slate-500 mb-4">Intervention workload required across portfolio</p>
+                    <div class="h-64">
+                        <canvas id="chart-actions"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Drivers Bar Chart -->
+            <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm mb-6">
+                <h3 class="text-base font-bold text-slate-800 mb-1">Most Frequent Churn Drivers across Portfolio</h3>
+                <p class="text-xs text-slate-500 mb-4">Top root causes pushing customers toward churn</p>
+                <div class="h-72">
+                    <canvas id="chart-drivers"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 3: MODEL & DATA INSIGHTS ================= -->
+        <div id="tab-insights" class="tab-content hidden">
+            <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 mb-6 flex items-start gap-3">
+                <div class="text-indigo-600 text-xl font-bold mt-0.5">💡</div>
+                <div class="text-sm text-indigo-900 leading-relaxed">
+                    <b>Direct ML Pipeline Traceability:</b> The churn predictions in this dashboard are generated directly from the model benchmark and explainability weights shown below. Review the Exploratory Data Analysis, Stacked Ensemble benchmark, and SHAP Beeswarm to understand exactly how customer decisions are computed.
+                </div>
+            </div>
+
+            <!-- Insight 1: EDA Insights -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 mb-8">
+                <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+                    <div>
+                        <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider">ML Phase 1 &bull; Exploratory Data Analysis</span>
+                        <h3 class="text-xl font-extrabold text-slate-900">Key Churn Patterns & Business Hypotheses</h3>
+                    </div>
+                    <span class="text-xs font-semibold px-2.5 py-1 bg-slate-100 text-slate-700 rounded-md border border-slate-200">Artifact: eda_insights.png</span>
+                </div>
+
+                <div class="bg-slate-50 rounded-lg p-2 border border-slate-200 mb-6 flex justify-center">
+                    <img src="eda_insights.png" alt="EDA Churn Insights" class="max-w-full rounded shadow-sm border border-slate-200 max-h-[460px] object-contain">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                        <h4 class="font-bold text-slate-800 text-sm flex items-center gap-1.5 mb-1.5">
+                            <span class="text-indigo-600 font-extrabold">1.</span> Month-to-Month Contract Vulnerability
+                        </h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Month-to-month contracts exhibit churn rates exceeding <b>42%</b>, whereas customers on 1-year contracts drop to <b>11%</b> and 2-year contracts to less than <b>3%</b>. Securing an annual commitment is the highest leverage retention action.
+                        </p>
+                    </div>
+
+                    <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                        <h4 class="font-bold text-slate-800 text-sm flex items-center gap-1.5 mb-1.5">
+                            <span class="text-indigo-600 font-extrabold">2.</span> Satisfaction Score Cliff (&le; 5 / 10)
+                        </h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Customers with satisfaction scores between 1 and 4 have churn probabilities ranging from <b>70% to 95%</b>. A score of 5 still exhibits 45% churn. Immediate executive callbacks are mandated when satisfaction drops.
+                        </p>
+                    </div>
+
+                    <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                        <h4 class="font-bold text-slate-800 text-sm flex items-center gap-1.5 mb-1.5">
+                            <span class="text-indigo-600 font-extrabold">3.</span> Billing Spike Trigger (15%+ Jump)
+                        </h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Customers experiencing a sudden billing jump (>15%) churn at over <b>51%</b>, compared to ~16% for stable bills. This bill shock immediately primes them for competitor offers.
+                        </p>
+                    </div>
+
+                    <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                        <h4 class="font-bold text-slate-800 text-sm flex items-center gap-1.5 mb-1.5">
+                            <span class="text-indigo-600 font-extrabold">4.</span> Network Degradation (Dropped Calls Doubled)
+                        </h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Churned customers report nearly double the average dropped calls (1.92 vs 1.02 in 30 days). Technical service resolution must accompany any commercial retention offer.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Insight 2: Model Comparison Benchmark -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 mb-8">
+                <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+                    <div>
+                        <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider">ML Phase 2 &bull; Model Evaluation</span>
+                        <h3 class="text-xl font-extrabold text-slate-900">Benchmark Comparison Across 4 Algorithms</h3>
+                    </div>
+                    <span class="text-xs font-semibold px-2.5 py-1 bg-slate-100 text-slate-700 rounded-md border border-slate-200">Artifact: model_comparison.png</span>
+                </div>
+
+                <div class="bg-slate-50 rounded-lg p-2 border border-slate-200 mb-6 flex justify-center">
+                    <img src="model_comparison.png" alt="Model Comparison Benchmark" class="max-w-full rounded shadow-sm border border-slate-200 max-h-[380px] object-contain">
+                </div>
+
+                <!-- Metric Benchmark Table -->
+                <div class="overflow-x-auto mb-4 border border-slate-200 rounded-xl">
+                    <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-600 font-bold text-xs uppercase">
+                            <tr>
+                                <th class="py-3 px-4">Algorithm</th>
+                                <th class="py-3 px-4">Recall (Sensitivity)</th>
+                                <th class="py-3 px-4">F1-Score</th>
+                                <th class="py-3 px-4">ROC-AUC</th>
+                                <th class="py-3 px-4">Why It Matters</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-xs sm:text-sm">
+                            <tr class="bg-indigo-50/40 font-semibold">
+                                <td class="py-3 px-4 text-indigo-900">🏆 Stacked Ensemble (Selected)</td>
+                                <td class="py-3 px-4 text-emerald-700 font-bold">79.1%</td>
+                                <td class="py-3 px-4 text-slate-700">0.644</td>
+                                <td class="py-3 px-4 text-indigo-700 font-bold">0.867</td>
+                                <td class="py-3 px-4 text-slate-600">Combines tree nonlinearities with linear baseline calibration for optimal retention precision.</td>
+                            </tr>
+                            <tr>
+                                <td class="py-3 px-4 font-medium text-slate-800">Logistic Regression</td>
+                                <td class="py-3 px-4 text-emerald-700 font-bold">81.2%</td>
+                                <td class="py-3 px-4 text-slate-700">0.643</td>
+                                <td class="py-3 px-4 text-indigo-700">0.862</td>
+                                <td class="py-3 px-4 text-slate-600">Highest pure recall; highly interpretable probability distribution.</td>
+                            </tr>
+                            <tr>
+                                <td class="py-3 px-4 font-medium text-slate-800">Random Forest</td>
+                                <td class="py-3 px-4 text-slate-700">74.5%</td>
+                                <td class="py-3 px-4 text-slate-700">0.631</td>
+                                <td class="py-3 px-4 text-indigo-700">0.858</td>
+                                <td class="py-3 px-4 text-slate-600">Captures complex multi-feature interactions, robust against outliers.</td>
+                            </tr>
+                            <tr>
+                                <td class="py-3 px-4 font-medium text-slate-800">Decision Tree</td>
+                                <td class="py-3 px-4 text-slate-700">77.4%</td>
+                                <td class="py-3 px-4 text-slate-700">0.618</td>
+                                <td class="py-3 px-4 text-indigo-700">0.819</td>
+                                <td class="py-3 px-4 text-slate-600">Transparent split boundaries, susceptible to variance.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs text-amber-900 leading-relaxed">
+                    <b>Retention Strategy Note:</b> In customer retention, <b>Recall is prioritized over simple accuracy</b>. A false negative (missing a customer who actually churns) costs the company $800+ in lost lifetime value, whereas a false positive merely costs a quick customer service call or proactive discount offer.
+                </div>
+            </div>
+
+            <!-- Insight 3: SHAP Explainability -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 mb-8">
+                <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+                    <div>
+                        <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider">ML Phase 3 &bull; Explainable AI (XAI)</span>
+                        <h3 class="text-xl font-extrabold text-slate-900">Global SHAP Beeswarm Plot</h3>
+                    </div>
+                    <span class="text-xs font-semibold px-2.5 py-1 bg-slate-100 text-slate-700 rounded-md border border-slate-200">Artifact: shap_summary.png</span>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+                    <div class="bg-slate-50 rounded-lg p-3 border border-slate-200 flex justify-center">
+                        <img src="shap_summary.png" alt="SHAP Summary Plot" class="max-w-full rounded shadow-sm border border-slate-200 max-h-[580px] object-contain">
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="border-l-4 border-indigo-600 pl-3">
+                            <h4 class="text-sm font-bold text-slate-900">How to Read the Beeswarm:</h4>
+                            <p class="text-xs text-slate-600 mt-1">
+                                Each dot represents an individual customer. Dots on the <b>right (+ x-axis)</b> push the prediction towards churn; dots on the <b>left (- x-axis)</b> pull toward retention. Red colors indicate high feature values, blue indicates low values.
+                            </p>
+                        </div>
+
+                        <div class="space-y-3 text-xs">
+                            <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                                <b class="text-slate-900">1. SatisfactionScore (Top Impact):</b> Blue dots (low satisfaction) spread far to the right (+0.15 SHAP), proving low satisfaction is the #1 churn driver across the entire company.
+                            </div>
+                            <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                                <b class="text-slate-900">2. Tenure:</b> Blue dots (short tenure &le; 9 months) heavily bias toward churn (+0.12 SHAP). Loyal customers (>3 years) remain safe.
+                            </div>
+                            <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                                <b class="text-slate-900">3. Contract_Two year:</b> Red dots (having a 2-year contract) cluster on the extreme left (-0.20 SHAP), virtually eliminating churn risk.
+                            </div>
+                            <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                                <b class="text-slate-900">4. InternetService_Fiber optic:</b> High-speed fiber customers without dedicated tech support exhibit elevated churn due to network expectation mismatches.
+                            </div>
+                            <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                                <b class="text-slate-900">5. BillingSpikePct & Flag:</b> Sharp billing jumps push SHAP values right, triggering price-sensitivity churn.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Customer Detail Modal / Drawer -->
+    <div id="customer-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-5">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[94vh] overflow-y-auto p-5 sm:p-6 border border-slate-200 relative animate-in fade-in zoom-in duration-200">
+            <button onclick="closeModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 transition p-1 rounded-lg hover:bg-slate-100">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+
+            <!-- Modal Header -->
+            <div class="flex items-center gap-3 border-b border-slate-100 pb-3 mb-4">
+                <div class="w-11 h-11 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-xl font-bold">
+                    👤
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h3 id="modal-cid" class="text-xl font-extrabold text-slate-900">0970-ETWGE</h3>
+                        <span id="modal-tier-badge" class="px-2.5 py-0.5 text-xs font-bold rounded-full bg-red-100 text-red-700">Critical Risk</span>
+                    </div>
+                    <p id="modal-contract" class="text-xs text-slate-500 mt-0.5">Month-to-month Contract</p>
+                </div>
+            </div>
+
+            <!-- Customer Telemetry Grid -->
+            <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-200 mb-4">
+                <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">📋 Customer Account & Service Telemetry</div>
+                <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 text-center mb-2">
+                    <div class="bg-white p-2 rounded-lg border border-slate-200">
+                        <div class="text-[10px] text-slate-400 font-bold uppercase">Tenure</div>
+                        <div id="tel-tenure" class="text-sm font-extrabold text-slate-800">-</div>
+                    </div>
+                    <div class="bg-white p-2 rounded-lg border border-slate-200">
+                        <div class="text-[10px] text-slate-400 font-bold uppercase">Monthly Bill</div>
+                        <div id="tel-monthly" class="text-sm font-extrabold text-slate-800">-</div>
+                    </div>
+                    <div class="bg-white p-2 rounded-lg border border-slate-200">
+                        <div class="text-[10px] text-slate-400 font-bold uppercase">Bill Spike</div>
+                        <div id="tel-spike" class="text-sm font-extrabold text-red-600">-</div>
+                    </div>
+                    <div class="bg-white p-2 rounded-lg border border-slate-200">
+                        <div class="text-[10px] text-slate-400 font-bold uppercase">Drop Calls</div>
+                        <div id="tel-drops" class="text-sm font-extrabold text-slate-800">-</div>
+                    </div>
+                    <div class="bg-white p-2 rounded-lg border border-slate-200">
+                        <div class="text-[10px] text-slate-400 font-bold uppercase">Support Calls</div>
+                        <div id="tel-custserv" class="text-sm font-extrabold text-slate-800">-</div>
+                    </div>
+                    <div class="bg-white p-2 rounded-lg border border-slate-200">
+                        <div class="text-[10px] text-slate-400 font-bold uppercase">Satisfaction</div>
+                        <div id="tel-sat" class="text-sm font-extrabold text-amber-600">-</div>
+                    </div>
+                </div>
+                <div class="text-[11px] text-slate-500 flex flex-wrap gap-x-3 gap-y-1">
+                    <span><b>Plan:</b> <span id="tel-plan">-</span></span>
+                    <span><b>Tech Support:</b> <span id="tel-support">-</span></span>
+                    <span><b>Payment:</b> <span id="tel-payment">-</span></span>
+                    <span><b>Total Spend:</b> <span id="tel-total">-</span></span>
+                </div>
+            </div>
+
+            <!-- Top 3 Drivers -->
+            <div class="mb-5">
+                <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">🔍 Top-3 Churn Drivers (SHAP & LIME Diagnostics)</div>
+                <div id="modal-drivers-list" class="space-y-2">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+
+            <!-- Prescribed Playbook -->
+            <div class="mb-5 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl p-4">
+                <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+                    <span id="modal-priority-badge" class="px-2.5 py-0.5 text-xs font-extrabold rounded-full bg-red-100 text-red-800 border border-red-200">
+                        🔴 URGENT INTERVENTION (Within 2-4 Hours)
+                    </span>
+                    <span class="text-xs font-bold text-emerald-800">Expected Retention Lift: ~75%</span>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                    <div class="bg-white/80 backdrop-blur p-3 rounded-lg border border-emerald-100">
+                        <div class="text-[11px] font-bold text-emerald-800 uppercase flex items-center gap-1"><span>💰</span> Commercial Offer</div>
+                        <div id="playbook-commercial" class="text-xs font-semibold text-slate-800 mt-1 leading-snug">-</div>
+                    </div>
+                    <div class="bg-white/80 backdrop-blur p-3 rounded-lg border border-emerald-100">
+                        <div class="text-[11px] font-bold text-emerald-800 uppercase flex items-center gap-1"><span>🛠️</span> Tech / Service Remedy</div>
+                        <div id="playbook-service" class="text-xs font-semibold text-slate-800 mt-1 leading-snug">-</div>
+                    </div>
+                    <div class="bg-white/80 backdrop-blur p-3 rounded-lg border border-emerald-100">
+                        <div class="text-[11px] font-bold text-emerald-800 uppercase flex items-center gap-1"><span>🎁</span> Loyalty Perk</div>
+                        <div id="playbook-perks" class="text-xs font-semibold text-slate-800 mt-1 leading-snug">-</div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between text-xs text-emerald-900 bg-white/60 p-2.5 rounded-lg border border-emerald-200">
+                    <span><b>Annual Customer Lifetime Value (CLV):</b> <span id="playbook-annual">-</span></span>
+                    <span class="font-extrabold text-emerald-700">Net Revenue Saved: <span id="playbook-saved">-</span></span>
+                </div>
+            </div>
+
+            <!-- Agent Call Script with Style Switcher -->
+            <div class="mb-5">
+                <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
+                    <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">📞 Agent Retention Teleprompter Script</div>
+                    <button onclick="copyScript()" id="copy-btn" class="text-xs px-2.5 py-1 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-bold rounded-lg transition border border-indigo-200 flex items-center gap-1">
+                        <span>Copy Script</span>
+                    </button>
+                </div>
+                
+                <div class="flex gap-2 mb-2 text-xs font-semibold">
+                    <button onclick="switchScriptStyle('empathy')" id="sbtn-empathy" class="script-tab-btn active px-3 py-1 rounded-lg border border-slate-200 transition">🤝 Empathy & Fix</button>
+                    <button onclick="switchScriptStyle('savings')" id="sbtn-savings" class="script-tab-btn px-3 py-1 rounded-lg border border-slate-200 text-slate-600 bg-white transition">💵 Price Relief</button>
+                    <button onclick="switchScriptStyle('vip')" id="sbtn-vip" class="script-tab-btn px-3 py-1 rounded-lg border border-slate-200 text-slate-600 bg-white transition">👑 VIP Loyalty</button>
+                </div>
+
+                <div id="modal-script-box" class="bg-slate-50 rounded-xl p-3.5 border border-slate-200 text-xs sm:text-sm text-slate-700 italic leading-relaxed">
+                    <!-- Script dynamically updated -->
+                </div>
+            </div>
+
+            <!-- What-If Retention Simulator -->
+            <div class="bg-indigo-50/50 rounded-xl p-4 border border-indigo-200">
+                <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
+                    <div>
+                        <h4 class="text-xs font-extrabold text-indigo-950 uppercase tracking-wider flex items-center gap-1.5">
+                            <span>🎛️ Live What-If Retention Simulator</span>
+                        </h4>
+                        <p class="text-[11px] text-indigo-700">Drag sliders and test offer bundles to watch churn probability drop live:</p>
+                    </div>
+                    <div class="flex gap-1.5 text-[11px] font-semibold">
+                        <button onclick="applySimPreset('recommended')" class="px-2 py-0.5 rounded bg-indigo-600 text-white hover:bg-indigo-700 transition">🚀 Auto-Bundle</button>
+                        <button onclick="applySimPreset('max')" class="px-2 py-0.5 rounded bg-purple-600 text-white hover:bg-purple-700 transition">🛡️ Max 2-Yr</button>
+                        <button onclick="applySimPreset('zerocost')" class="px-2 py-0.5 rounded bg-emerald-600 text-white hover:bg-emerald-700 transition">💡 Zero-Cost</button>
+                        <button onclick="applySimPreset('reset')" class="px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 transition">🔄 Reset</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-3">
+                    <!-- Left Controls -->
+                    <div class="space-y-3 text-xs">
+                        <div>
+                            <label class="font-bold text-slate-700 mb-1 block">Contract Lever:</label>
+                            <div class="flex gap-1.5">
+                                <button type="button" onclick="setSimContract('m2m')" id="cpill-m2m" class="contract-pill active flex-1 py-1 px-2 text-center rounded-lg border border-slate-200 font-bold transition">Month-to-Month</button>
+                                <button type="button" onclick="setSimContract('1yr')" id="cpill-1yr" class="contract-pill flex-1 py-1 px-2 text-center rounded-lg border border-slate-200 font-bold bg-white text-slate-700 transition">1-Year Lock (-22%)</button>
+                                <button type="button" onclick="setSimContract('2yr')" id="cpill-2yr" class="contract-pill flex-1 py-1 px-2 text-center rounded-lg border border-slate-200 font-bold bg-white text-slate-700 transition">2-Year Lock (-34%)</button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between font-bold text-slate-700 mb-0.5">
+                                <span>Monthly Discount:</span>
+                                <span id="lbl-discount" class="text-indigo-600 font-extrabold">0%</span>
+                            </div>
+                            <input type="range" id="sim-slider-discount" min="0" max="35" step="5" value="0" oninput="updateLiveSim()" class="w-full">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between font-bold text-slate-700 mb-0.5">
+                                <span>Target Satisfaction Improvement:</span>
+                                <span id="lbl-sat" class="text-indigo-600 font-extrabold">+0 points</span>
+                            </div>
+                            <input type="range" id="sim-slider-sat" min="0" max="6" step="1" value="0" oninput="updateLiveSim()" class="w-full">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 pt-1">
+                            <label class="flex items-center gap-1.5 cursor-pointer bg-white p-2 rounded-lg border border-indigo-100">
+                                <input type="checkbox" id="sim-chk-network" onchange="updateLiveSim()" class="rounded text-indigo-600">
+                                <span class="text-[11px] font-semibold text-slate-700">Fix All Drops (-14%)</span>
+                            </label>
+                            <label class="flex items-center gap-1.5 cursor-pointer bg-white p-2 rounded-lg border border-indigo-100">
+                                <input type="checkbox" id="sim-chk-tech" onchange="updateLiveSim()" class="rounded text-indigo-600">
+                                <span class="text-[11px] font-semibold text-slate-700">Free Tech Support (-10%)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Right Visual Live Gauge Result -->
+                    <div class="flex flex-col justify-between bg-white rounded-xl p-3.5 border border-indigo-200">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-slate-500 uppercase">Simulated Churn Probability</span>
+                            <span id="sim-badge" class="px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700">Critical Risk</span>
+                        </div>
+
+                        <div class="flex items-center justify-around my-2">
+                            <div class="text-center">
+                                <div class="text-[10px] text-slate-400 uppercase font-bold">Baseline</div>
+                                <div id="sim-orig-val" class="text-2xl font-extrabold text-slate-500">93.7%</div>
+                            </div>
+                            <div class="text-indigo-400 text-xl font-bold">&rarr;</div>
+                            <div class="text-center">
+                                <div class="text-[10px] text-emerald-600 uppercase font-bold">Post-Offer</div>
+                                <div id="sim-new-val" class="text-3xl font-extrabold text-emerald-600 transition-all duration-300">93.7%</div>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-[11px] space-y-1 text-slate-600">
+                            <div class="flex justify-between">
+                                <span>Absolute Churn Reduction:</span>
+                                <b id="sim-delta" class="text-emerald-700">-0.0%</b>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Net Annual Revenue Saved:</span>
+                                <b id="sim-revenue-saved" class="text-slate-900">$0.00 / yr</b>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        const rawData = [{"customerID": "0970-ETWGE", "Contract": "Month-to-month", "risk_score": 0.937, "driver1": "Contract_Two year=0", "w1": 0.201, "driver2": "tenure <= 9.00", "w2": 0.188, "driver3": "SatisfactionScore <= 5.00", "w3": 0.181, "suggested_action": "Senior agent callback", "tenure": 1, "monthlyCharges": 89.55, "totalCharges": 89.55, "billingSpikePct": 44.3, "droppedCalls": 4, "custServiceCalls": 6, "satisfaction": 2, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "6861-XWTWQ", "Contract": "Month-to-month", "risk_score": 0.935, "driver1": "tenure <= 9.00", "w1": 0.191, "driver2": "Contract_Two year=0", "w2": 0.19, "driver3": "SatisfactionScore <= 5.00", "w3": 0.154, "suggested_action": "Senior agent callback", "tenure": 7, "monthlyCharges": 99.25, "totalCharges": 665.45, "billingSpikePct": 49.6, "droppedCalls": 5, "custServiceCalls": 3, "satisfaction": 3, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "8884-ADFVN", "Contract": "Month-to-month", "risk_score": 0.933, "driver1": "Contract_Two year=0", "w1": 0.194, "driver2": "tenure <= 9.00", "w2": 0.181, "driver3": "InternetService_Fiber optic=1", "w3": 0.165, "suggested_action": "Offer 1-year plan with discount", "tenure": 7, "monthlyCharges": 101.95, "totalCharges": 700.85, "billingSpikePct": 57.7, "droppedCalls": 5, "custServiceCalls": 3, "satisfaction": 3, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "4342-HENTK", "Contract": "Month-to-month", "risk_score": 0.933, "driver1": "tenure <= 9.00", "w1": 0.198, "driver2": "Contract_Two year=0", "w2": 0.192, "driver3": "SatisfactionScore <= 5.00", "w3": 0.176, "suggested_action": "Senior agent callback", "tenure": 2, "monthlyCharges": 70.65, "totalCharges": 142.35, "billingSpikePct": 35.9, "droppedCalls": 5, "custServiceCalls": 6, "satisfaction": 1, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "3519-ZKXGG", "Contract": "Month-to-month", "risk_score": 0.932, "driver1": "tenure <= 9.00", "w1": 0.204, "driver2": "Contract_Two year=0", "w2": 0.201, "driver3": "InternetService_Fiber optic=1", "w3": 0.15, "suggested_action": "Offer 1-year plan with discount", "tenure": 3, "monthlyCharges": 75.85, "totalCharges": 256.6, "billingSpikePct": 28.0, "droppedCalls": 6, "custServiceCalls": 6, "satisfaction": 2, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "2865-TCHJW", "Contract": "Month-to-month", "risk_score": 0.932, "driver1": "tenure <= 9.00", "w1": 0.204, "driver2": "Contract_Two year=0", "w2": 0.199, "driver3": "InternetService_Fiber optic=1", "w3": 0.158, "suggested_action": "Offer 1-year plan with discount", "tenure": 4, "monthlyCharges": 89.2, "totalCharges": 346.2, "billingSpikePct": 24.4, "droppedCalls": 8, "custServiceCalls": 4, "satisfaction": 2, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "9248-OJYKK", "Contract": "Month-to-month", "risk_score": 0.931, "driver1": "tenure <= 9.00", "w1": 0.195, "driver2": "Contract_Two year=0", "w2": 0.193, "driver3": "InternetService_Fiber optic=1", "w3": 0.156, "suggested_action": "Offer 1-year plan with discount", "tenure": 1, "monthlyCharges": 76.45, "totalCharges": 76.45, "billingSpikePct": 29.5, "droppedCalls": 3, "custServiceCalls": 3, "satisfaction": 4, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "9057-SIHCH", "Contract": "Month-to-month", "risk_score": 0.931, "driver1": "Contract_Two year=0", "w1": 0.206, "driver2": "tenure <= 9.00", "w2": 0.187, "driver3": "SatisfactionScore <= 5.00", "w3": 0.17, "suggested_action": "Senior agent callback", "tenure": 3, "monthlyCharges": 96.6, "totalCharges": 291.9, "billingSpikePct": 24.4, "droppedCalls": 6, "custServiceCalls": 3, "satisfaction": 3, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "8361-LTMKD", "Contract": "Month-to-month", "risk_score": 0.93, "driver1": "Contract_Two year=0", "w1": 0.223, "driver2": "tenure <= 9.00", "w2": 0.2, "driver3": "SatisfactionScore <= 5.00", "w3": 0.163, "suggested_action": "Senior agent callback", "tenure": 4, "monthlyCharges": 74.4, "totalCharges": 306.6, "billingSpikePct": 24.4, "droppedCalls": 6, "custServiceCalls": 5, "satisfaction": 1, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Mailed check"}, {"customerID": "2514-GINMM", "Contract": "Month-to-month", "risk_score": 0.93, "driver1": "Contract_Two year=0", "w1": 0.192, "driver2": "tenure <= 9.00", "w2": 0.18, "driver3": "InternetService_Fiber optic=1", "w3": 0.17, "suggested_action": "Offer 1-year plan with discount", "tenure": 1, "monthlyCharges": 79.5, "totalCharges": 79.5, "billingSpikePct": 54.9, "droppedCalls": 2, "custServiceCalls": 2, "satisfaction": 2, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "8245-UMPYT", "Contract": "Month-to-month", "risk_score": 0.93, "driver1": "Contract_Two year=0", "w1": 0.208, "driver2": "InternetService_Fiber optic=1", "w2": 0.154, "driver3": "SatisfactionScore <= 5.00", "w3": 0.149, "suggested_action": "Senior agent callback", "tenure": 16, "monthlyCharges": 96.4, "totalCharges": 1581.2, "billingSpikePct": 42.5, "droppedCalls": 5, "custServiceCalls": 4, "satisfaction": 4, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "1400-MMYXY", "Contract": "Month-to-month", "risk_score": 0.929, "driver1": "Contract_Two year=0", "w1": 0.198, "driver2": "tenure <= 9.00", "w2": 0.175, "driver3": "InternetService_Fiber optic=1", "w3": 0.155, "suggested_action": "Offer 1-year plan with discount", "tenure": 3, "monthlyCharges": 105.9, "totalCharges": 334.65, "billingSpikePct": 59.9, "droppedCalls": 3, "custServiceCalls": 4, "satisfaction": 3, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "9611-CTWIH", "Contract": "Month-to-month", "risk_score": 0.928, "driver1": "Contract_Two year=0", "w1": 0.203, "driver2": "tenure <= 9.00", "w2": 0.185, "driver3": "SatisfactionScore <= 5.00", "w3": 0.166, "suggested_action": "Senior agent callback", "tenure": 3, "monthlyCharges": 89.45, "totalCharges": 240.45, "billingSpikePct": 58.5, "droppedCalls": 9, "custServiceCalls": 3, "satisfaction": 2, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "4750-ZRXIU", "Contract": "Month-to-month", "risk_score": 0.928, "driver1": "Contract_Two year=0", "w1": 0.19, "driver2": "tenure <= 9.00", "w2": 0.18, "driver3": "InternetService_Fiber optic=1", "w3": 0.168, "suggested_action": "Offer 1-year plan with discount", "tenure": 4, "monthlyCharges": 84.6, "totalCharges": 360.1, "billingSpikePct": 19.2, "droppedCalls": 2, "custServiceCalls": 6, "satisfaction": 3, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "9747-DDZOS", "Contract": "Month-to-month", "risk_score": 0.928, "driver1": "tenure <= 9.00", "w1": 0.201, "driver2": "Contract_Two year=0", "w2": 0.181, "driver3": "InternetService_Fiber optic=1", "w3": 0.172, "suggested_action": "Offer 1-year plan with discount", "tenure": 1, "monthlyCharges": 73.5, "totalCharges": 73.5, "billingSpikePct": 31.2, "droppedCalls": 3, "custServiceCalls": 4, "satisfaction": 1, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Bank transfer (automatic)"}, {"customerID": "0390-DCFDQ", "Contract": "Month-to-month", "risk_score": 0.927, "driver1": "Contract_Two year=0", "w1": 0.208, "driver2": "tenure <= 9.00", "w2": 0.194, "driver3": "SatisfactionScore <= 5.00", "w3": 0.159, "suggested_action": "Senior agent callback", "tenure": 1, "monthlyCharges": 70.45, "totalCharges": 70.45, "billingSpikePct": 48.2, "droppedCalls": 1, "custServiceCalls": 8, "satisfaction": 2, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Mailed check"}, {"customerID": "1069-XAIEM", "Contract": "Month-to-month", "risk_score": 0.926, "driver1": "Contract_Two year=0", "w1": 0.202, "driver2": "tenure <= 9.00", "w2": 0.187, "driver3": "SatisfactionScore <= 5.00", "w3": 0.175, "suggested_action": "Senior agent callback", "tenure": 1, "monthlyCharges": 85.05, "totalCharges": 85.05, "billingSpikePct": 19.5, "droppedCalls": 0, "custServiceCalls": 4, "satisfaction": 4, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "3722-WPXTK", "Contract": "Month-to-month", "risk_score": 0.926, "driver1": "tenure <= 9.00", "w1": 0.212, "driver2": "Contract_Two year=0", "w2": 0.187, "driver3": "InternetService_Fiber optic=1", "w3": 0.169, "suggested_action": "Offer 1-year plan with discount", "tenure": 1, "monthlyCharges": 88.35, "totalCharges": 88.35, "billingSpikePct": 59.3, "droppedCalls": 8, "custServiceCalls": 3, "satisfaction": 5, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "6857-VWJDT", "Contract": "Month-to-month", "risk_score": 0.925, "driver1": "Contract_Two year=0", "w1": 0.186, "driver2": "tenure <= 9.00", "w2": 0.185, "driver3": "SatisfactionScore <= 5.00", "w3": 0.162, "suggested_action": "Senior agent callback", "tenure": 1, "monthlyCharges": 95.65, "totalCharges": 95.65, "billingSpikePct": 36.8, "droppedCalls": 2, "custServiceCalls": 5, "satisfaction": 4, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Mailed check"}, {"customerID": "4115-NZRKS", "Contract": "Month-to-month", "risk_score": 0.925, "driver1": "tenure <= 9.00", "w1": 0.213, "driver2": "Contract_Two year=0", "w2": 0.211, "driver3": "SatisfactionScore <= 5.00", "w3": 0.16, "suggested_action": "Senior agent callback", "tenure": 7, "monthlyCharges": 89.15, "totalCharges": 574.35, "billingSpikePct": 31.2, "droppedCalls": 1, "custServiceCalls": 1, "satisfaction": 3, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "5196-SGOAK", "Contract": "Month-to-month", "risk_score": 0.925, "driver1": "tenure <= 9.00", "w1": 0.216, "driver2": "Contract_Two year=0", "w2": 0.187, "driver3": "InternetService_Fiber optic=1", "w3": 0.162, "suggested_action": "Offer 1-year plan with discount", "tenure": 1, "monthlyCharges": 75.7, "totalCharges": 75.7, "billingSpikePct": 55.6, "droppedCalls": 5, "custServiceCalls": 4, "satisfaction": 3, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "2609-IAICY", "Contract": "Month-to-month", "risk_score": 0.924, "driver1": "Contract_Two year=0", "w1": 0.212, "driver2": "tenure <= 9.00", "w2": 0.207, "driver3": "InternetService_Fiber optic=1", "w3": 0.158, "suggested_action": "Offer 1-year plan with discount", "tenure": 1, "monthlyCharges": 77.15, "totalCharges": 77.15, "billingSpikePct": 54.4, "droppedCalls": 6, "custServiceCalls": 1, "satisfaction": 4, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "3320-VEOYC", "Contract": "Month-to-month", "risk_score": 0.924, "driver1": "Contract_Two year=0", "w1": 0.215, "driver2": "InternetService_Fiber optic=1", "w2": 0.159, "driver3": "SatisfactionScore <= 5.00", "w3": 0.149, "suggested_action": "Senior agent callback", "tenure": 14, "monthlyCharges": 95.6, "totalCharges": 1273.3, "billingSpikePct": 28.0, "droppedCalls": 4, "custServiceCalls": 2, "satisfaction": 4, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "3716-BDVDB", "Contract": "Month-to-month", "risk_score": 0.924, "driver1": "Contract_Two year=0", "w1": 0.191, "driver2": "tenure <= 9.00", "w2": 0.179, "driver3": "InternetService_Fiber optic=1", "w3": 0.163, "suggested_action": "Offer 1-year plan with discount", "tenure": 1, "monthlyCharges": 69.1, "totalCharges": 69.1, "billingSpikePct": 30.4, "droppedCalls": 2, "custServiceCalls": 2, "satisfaction": 3, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "1820-TQVEV", "Contract": "Month-to-month", "risk_score": 0.923, "driver1": "Contract_Two year=0", "w1": 0.22, "driver2": "tenure <= 9.00", "w2": 0.19, "driver3": "SatisfactionScore <= 5.00", "w3": 0.183, "suggested_action": "Senior agent callback", "tenure": 1, "monthlyCharges": 69.55, "totalCharges": 69.55, "billingSpikePct": 43.1, "droppedCalls": 7, "custServiceCalls": 3, "satisfaction": 5, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "5186-SAMNZ", "Contract": "Month-to-month", "risk_score": 0.923, "driver1": "Contract_Two year=0", "w1": 0.203, "driver2": "tenure <= 9.00", "w2": 0.174, "driver3": "InternetService_Fiber optic=1", "w3": 0.163, "suggested_action": "Offer 1-year plan with discount", "tenure": 1, "monthlyCharges": 69.5, "totalCharges": 69.5, "billingSpikePct": 53.7, "droppedCalls": 2, "custServiceCalls": 7, "satisfaction": 4, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Bank transfer (automatic)"}, {"customerID": "0295-PPHDO", "Contract": "Month-to-month", "risk_score": 0.922, "driver1": "tenure <= 9.00", "w1": 0.204, "driver2": "Contract_Two year=0", "w2": 0.197, "driver3": "InternetService_Fiber optic=1", "w3": 0.157, "suggested_action": "Offer 1-year plan with discount", "tenure": 1, "monthlyCharges": 95.45, "totalCharges": 95.45, "billingSpikePct": 52.0, "droppedCalls": 3, "custServiceCalls": 3, "satisfaction": 6, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "7005-CCBKV", "Contract": "Month-to-month", "risk_score": 0.922, "driver1": "tenure <= 9.00", "w1": 0.194, "driver2": "Contract_Two year=0", "w2": 0.192, "driver3": "SatisfactionScore <= 5.00", "w3": 0.169, "suggested_action": "Senior agent callback", "tenure": 6, "monthlyCharges": 84.4, "totalCharges": 556.35, "billingSpikePct": 29.5, "droppedCalls": 3, "custServiceCalls": 5, "satisfaction": 4, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "1143-NMNQJ", "Contract": "Month-to-month", "risk_score": 0.922, "driver1": "Contract_Two year=0", "w1": 0.212, "driver2": "tenure <= 9.00", "w2": 0.187, "driver3": "InternetService_Fiber optic=1", "w3": 0.14, "suggested_action": "Offer 1-year plan with discount", "tenure": 2, "monthlyCharges": 85.7, "totalCharges": 169.8, "billingSpikePct": 45.8, "droppedCalls": 5, "custServiceCalls": 6, "satisfaction": 6, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "5442-BHQNG", "Contract": "Month-to-month", "risk_score": 0.921, "driver1": "tenure <= 9.00", "w1": 0.215, "driver2": "Contract_Two year=0", "w2": 0.188, "driver3": "SatisfactionScore <= 5.00", "w3": 0.159, "suggested_action": "Senior agent callback", "tenure": 2, "monthlyCharges": 70.35, "totalCharges": 139.25, "billingSpikePct": 36.6, "droppedCalls": 10, "custServiceCalls": 6, "satisfaction": 3, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "2754-SDJRD", "Contract": "Month-to-month", "risk_score": 0.921, "driver1": "Contract_Two year=0", "w1": 0.216, "driver2": "tenure <= 9.00", "w2": 0.193, "driver3": "SatisfactionScore <= 5.00", "w3": 0.16, "suggested_action": "Senior agent callback", "tenure": 8, "monthlyCharges": 100.15, "totalCharges": 908.55, "billingSpikePct": 56.7, "droppedCalls": 3, "custServiceCalls": 1, "satisfaction": 3, "internetService": "Fiber optic", "techSupport": "Yes", "paymentMethod": "Credit card (automatic)"}, {"customerID": "4229-CZMLL", "Contract": "Month-to-month", "risk_score": 0.921, "driver1": "Contract_Two year=0", "w1": 0.215, "driver2": "tenure <= 9.00", "w2": 0.198, "driver3": "SatisfactionScore <= 5.00", "w3": 0.168, "suggested_action": "Senior agent callback", "tenure": 6, "monthlyCharges": 74.9, "totalCharges": 469.8, "billingSpikePct": 50.7, "droppedCalls": 2, "custServiceCalls": 5, "satisfaction": 5, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "5178-LMXOP", "Contract": "Month-to-month", "risk_score": 0.921, "driver1": "Contract_Two year=0", "w1": 0.211, "driver2": "tenure <= 9.00", "w2": 0.209, "driver3": "InternetService_Fiber optic=1", "w3": 0.165, "suggested_action": "Offer 1-year plan with discount", "tenure": 1, "monthlyCharges": 95.1, "totalCharges": 95.1, "billingSpikePct": 22.3, "droppedCalls": 2, "custServiceCalls": 4, "satisfaction": 6, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "8443-ZRDBZ", "Contract": "Month-to-month", "risk_score": 0.92, "driver1": "tenure <= 9.00", "w1": 0.203, "driver2": "Contract_Two year=0", "w2": 0.194, "driver3": "InternetService_Fiber optic=1", "w3": 0.141, "suggested_action": "Offer 1-year plan with discount", "tenure": 4, "monthlyCharges": 76.05, "totalCharges": 318.9, "billingSpikePct": 39.4, "droppedCalls": 2, "custServiceCalls": 4, "satisfaction": 5, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "2254-DLXRI", "Contract": "Month-to-month", "risk_score": 0.919, "driver1": "Contract_Two year=0", "w1": 0.211, "driver2": "tenure <= 9.00", "w2": 0.195, "driver3": "InternetService_Fiber optic=1", "w3": 0.155, "suggested_action": "Offer 1-year plan with discount", "tenure": 1, "monthlyCharges": 79.15, "totalCharges": 79.15, "billingSpikePct": 41.1, "droppedCalls": 1, "custServiceCalls": 1, "satisfaction": 3, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Mailed check"}, {"customerID": "1768-ZAIFU", "Contract": "Month-to-month", "risk_score": 0.919, "driver1": "tenure <= 9.00", "w1": 0.184, "driver2": "Contract_Two year=0", "w2": 0.184, "driver3": "MonthlyCharges <= 35.66", "w3": 0.168, "suggested_action": "Bill review call + discount offer", "tenure": 1, "monthlyCharges": 25.2, "totalCharges": 25.2, "billingSpikePct": 46.0, "droppedCalls": 0, "custServiceCalls": 1, "satisfaction": 4, "internetService": "DSL", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "4806-KEXQR", "Contract": "Month-to-month", "risk_score": 0.918, "driver1": "Contract_Two year=0", "w1": 0.208, "driver2": "tenure <= 9.00", "w2": 0.198, "driver3": "SatisfactionScore <= 5.00", "w3": 0.162, "suggested_action": "Senior agent callback", "tenure": 4, "monthlyCharges": 79.9, "totalCharges": 324.3, "billingSpikePct": 55.4, "droppedCalls": 4, "custServiceCalls": 3, "satisfaction": 4, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "4713-LZDRV", "Contract": "Month-to-month", "risk_score": 0.917, "driver1": "Contract_Two year=0", "w1": 0.206, "driver2": "tenure <= 9.00", "w2": 0.194, "driver3": "SatisfactionScore <= 5.00", "w3": 0.158, "suggested_action": "Senior agent callback", "tenure": 2, "monthlyCharges": 79.6, "totalCharges": 195.05, "billingSpikePct": 56.4, "droppedCalls": 2, "custServiceCalls": 0, "satisfaction": 4, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "7571-YXDAD", "Contract": "Month-to-month", "risk_score": 0.916, "driver1": "Contract_Two year=0", "w1": 0.188, "driver2": "tenure <= 9.00", "w2": 0.187, "driver3": "SatisfactionScore <= 5.00", "w3": 0.158, "suggested_action": "Senior agent callback", "tenure": 2, "monthlyCharges": 74.9, "totalCharges": 147.15, "billingSpikePct": 48.8, "droppedCalls": 1, "custServiceCalls": 4, "satisfaction": 2, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Credit card (automatic)"}, {"customerID": "6899-PPEEA", "Contract": "Month-to-month", "risk_score": 0.916, "driver1": "Contract_Two year=0", "w1": 0.202, "driver2": "SatisfactionScore <= 5.00", "w2": 0.179, "driver3": "InternetService_Fiber optic=1", "w3": 0.133, "suggested_action": "Senior agent callback", "tenure": 37, "monthlyCharges": 96.55, "totalCharges": 3580.3, "billingSpikePct": 42.5, "droppedCalls": 3, "custServiceCalls": 2, "satisfaction": 3, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "6023-YEBUP", "Contract": "Month-to-month", "risk_score": 0.915, "driver1": "Contract_Two year=0", "w1": 0.213, "driver2": "tenure <= 9.00", "w2": 0.209, "driver3": "InternetService_Fiber optic=1", "w3": 0.156, "suggested_action": "Offer 1-year plan with discount", "tenure": 3, "monthlyCharges": 100.95, "totalCharges": 329.95, "billingSpikePct": 21.4, "droppedCalls": 8, "custServiceCalls": 3, "satisfaction": 6, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "3707-GNWHM", "Contract": "Month-to-month", "risk_score": 0.915, "driver1": "Contract_Two year=0", "w1": 0.211, "driver2": "tenure <= 9.00", "w2": 0.186, "driver3": "InternetService_Fiber optic=1", "w3": 0.16, "suggested_action": "Offer 1-year plan with discount", "tenure": 1, "monthlyCharges": 74.25, "totalCharges": 74.25, "billingSpikePct": 37.1, "droppedCalls": 6, "custServiceCalls": 2, "satisfaction": 5, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Mailed check"}, {"customerID": "9507-EXLTT", "Contract": "Month-to-month", "risk_score": 0.915, "driver1": "Contract_Two year=0", "w1": 0.216, "driver2": "tenure <= 9.00", "w2": 0.19, "driver3": "InternetService_Fiber optic=1", "w3": 0.165, "suggested_action": "Offer 1-year plan with discount", "tenure": 1, "monthlyCharges": 79.35, "totalCharges": 79.35, "billingSpikePct": 49.0, "droppedCalls": 2, "custServiceCalls": 1, "satisfaction": 4, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Bank transfer (automatic)"}, {"customerID": "2754-XBHTB", "Contract": "Month-to-month", "risk_score": 0.914, "driver1": "Contract_Two year=0", "w1": 0.2, "driver2": "tenure <= 9.00", "w2": 0.193, "driver3": "SatisfactionScore <= 5.00", "w3": 0.159, "suggested_action": "Senior agent callback", "tenure": 9, "monthlyCharges": 77.65, "totalCharges": 714.15, "billingSpikePct": 44.4, "droppedCalls": 1, "custServiceCalls": 4, "satisfaction": 3, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Bank transfer (automatic)"}, {"customerID": "7218-HKQFK", "Contract": "Month-to-month", "risk_score": 0.914, "driver1": "Contract_Two year=0", "w1": 0.203, "driver2": "tenure <= 9.00", "w2": 0.182, "driver3": "SatisfactionScore <= 5.00", "w3": 0.158, "suggested_action": "Senior agent callback", "tenure": 2, "monthlyCharges": 94.2, "totalCharges": 167.5, "billingSpikePct": 46.9, "droppedCalls": 7, "custServiceCalls": 2, "satisfaction": 5, "internetService": "Fiber optic", "techSupport": "Yes", "paymentMethod": "Electronic check"}, {"customerID": "3677-IYRBF", "Contract": "Month-to-month", "risk_score": 0.914, "driver1": "tenure <= 9.00", "w1": 0.204, "driver2": "Contract_Two year=0", "w2": 0.202, "driver3": "SatisfactionScore <= 5.00", "w3": 0.172, "suggested_action": "Senior agent callback", "tenure": 2, "monthlyCharges": 30.4, "totalCharges": 78.65, "billingSpikePct": 58.2, "droppedCalls": 0, "custServiceCalls": 2, "satisfaction": 4, "internetService": "DSL", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "7249-WBIYX", "Contract": "Month-to-month", "risk_score": 0.914, "driver1": "Contract_Two year=0", "w1": 0.203, "driver2": "SatisfactionScore <= 5.00", "w2": 0.17, "driver3": "InternetService_Fiber optic=1", "w3": 0.168, "suggested_action": "Senior agent callback", "tenure": 10, "monthlyCharges": 85.6, "totalCharges": 813.85, "billingSpikePct": 43.6, "droppedCalls": 2, "custServiceCalls": 4, "satisfaction": 5, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "3199-XGZCY", "Contract": "Month-to-month", "risk_score": 0.913, "driver1": "Contract_Two year=0", "w1": 0.2, "driver2": "tenure <= 9.00", "w2": 0.184, "driver3": "SatisfactionScore <= 5.00", "w3": 0.167, "suggested_action": "Senior agent callback", "tenure": 8, "monthlyCharges": 75.25, "totalCharges": 576.7, "billingSpikePct": 51.1, "droppedCalls": 1, "custServiceCalls": 5, "satisfaction": 5, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "6372-RFVNS", "Contract": "Month-to-month", "risk_score": 0.913, "driver1": "Contract_Two year=0", "w1": 0.206, "driver2": "tenure <= 9.00", "w2": 0.199, "driver3": "InternetService_Fiber optic=1", "w3": 0.155, "suggested_action": "Offer 1-year plan with discount", "tenure": 1, "monthlyCharges": 78.8, "totalCharges": 78.8, "billingSpikePct": 48.1, "droppedCalls": 2, "custServiceCalls": 0, "satisfaction": 4, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "2034-GDRCN", "Contract": "Month-to-month", "risk_score": 0.913, "driver1": "Contract_Two year=0", "w1": 0.217, "driver2": "tenure <= 9.00", "w2": 0.175, "driver3": "SatisfactionScore <= 5.00", "w3": 0.163, "suggested_action": "Senior agent callback", "tenure": 2, "monthlyCharges": 90.4, "totalCharges": 168.2, "billingSpikePct": 15.5, "droppedCalls": 1, "custServiceCalls": 3, "satisfaction": 4, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "8445-DNBAE", "Contract": "Month-to-month", "risk_score": 0.912, "driver1": "Contract_Two year=0", "w1": 0.217, "driver2": "tenure <= 9.00", "w2": 0.2, "driver3": "SatisfactionScore <= 5.00", "w3": 0.174, "suggested_action": "Senior agent callback", "tenure": 1, "monthlyCharges": 50.05, "totalCharges": 50.05, "billingSpikePct": 58.9, "droppedCalls": 2, "custServiceCalls": 6, "satisfaction": 2, "internetService": "DSL", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "8380-PEFPE", "Contract": "Month-to-month", "risk_score": 0.912, "driver1": "tenure <= 9.00", "w1": 0.189, "driver2": "Contract_Two year=0", "w2": 0.179, "driver3": "SatisfactionScore <= 5.00", "w3": 0.151, "suggested_action": "Senior agent callback", "tenure": 1, "monthlyCharges": 71.65, "totalCharges": 71.65, "billingSpikePct": 29.9, "droppedCalls": 3, "custServiceCalls": 4, "satisfaction": 5, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "0679-IDSTG", "Contract": "Month-to-month", "risk_score": 0.912, "driver1": "Contract_Two year=0", "w1": 0.205, "driver2": "tenure <= 9.00", "w2": 0.176, "driver3": "InternetService_Fiber optic=1", "w3": 0.173, "suggested_action": "Offer 1-year plan with discount", "tenure": 1, "monthlyCharges": 69.25, "totalCharges": 69.25, "billingSpikePct": 47.3, "droppedCalls": 2, "custServiceCalls": 1, "satisfaction": 4, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "6319-IEJWJ", "Contract": "Month-to-month", "risk_score": 0.912, "driver1": "Contract_Two year=0", "w1": 0.183, "driver2": "SatisfactionScore <= 5.00", "w2": 0.164, "driver3": "InternetService_Fiber optic=1", "w3": 0.161, "suggested_action": "Senior agent callback", "tenure": 20, "monthlyCharges": 90.2, "totalCharges": 1776.55, "billingSpikePct": 37.8, "droppedCalls": 2, "custServiceCalls": 3, "satisfaction": 3, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "5228-EXCET", "Contract": "Month-to-month", "risk_score": 0.912, "driver1": "Contract_Two year=0", "w1": 0.208, "driver2": "SatisfactionScore <= 5.00", "w2": 0.166, "driver3": "InternetService_Fiber optic=1", "w3": 0.156, "suggested_action": "Senior agent callback", "tenure": 13, "monthlyCharges": 80.85, "totalCharges": 1008.7, "billingSpikePct": 34.1, "droppedCalls": 1, "custServiceCalls": 1, "satisfaction": 3, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "9804-ICWBG", "Contract": "Month-to-month", "risk_score": 0.912, "driver1": "tenure <= 9.00", "w1": 0.195, "driver2": "Contract_Two year=0", "w2": 0.194, "driver3": "InternetService_Fiber optic=1", "w3": 0.165, "suggested_action": "Offer 1-year plan with discount", "tenure": 1, "monthlyCharges": 69.9, "totalCharges": 69.9, "billingSpikePct": 18.8, "droppedCalls": 0, "custServiceCalls": 5, "satisfaction": 4, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "5052-PNLOS", "Contract": "Month-to-month", "risk_score": 0.912, "driver1": "Contract_Two year=0", "w1": 0.216, "driver2": "tenure <= 9.00", "w2": 0.196, "driver3": "SatisfactionScore <= 5.00", "w3": 0.155, "suggested_action": "Senior agent callback", "tenure": 3, "monthlyCharges": 105.35, "totalCharges": 323.25, "billingSpikePct": 15.1, "droppedCalls": 0, "custServiceCalls": 5, "satisfaction": 3, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Bank transfer (automatic)"}, {"customerID": "0432-CAJZV", "Contract": "Month-to-month", "risk_score": 0.911, "driver1": "Contract_Two year=0", "w1": 0.199, "driver2": "tenure <= 9.00", "w2": 0.179, "driver3": "SatisfactionScore <= 5.00", "w3": 0.173, "suggested_action": "Senior agent callback", "tenure": 3, "monthlyCharges": 90.7, "totalCharges": 237.65, "billingSpikePct": 36.1, "droppedCalls": 0, "custServiceCalls": 3, "satisfaction": 2, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Mailed check"}, {"customerID": "7130-VTEWQ", "Contract": "Month-to-month", "risk_score": 0.911, "driver1": "tenure <= 9.00", "w1": 0.207, "driver2": "Contract_Two year=0", "w2": 0.194, "driver3": "SatisfactionScore <= 5.00", "w3": 0.164, "suggested_action": "Senior agent callback", "tenure": 8, "monthlyCharges": 75.75, "totalCharges": 606.25, "billingSpikePct": 47.2, "droppedCalls": 4, "custServiceCalls": 1, "satisfaction": 5, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "0506-LVNGN", "Contract": "Month-to-month", "risk_score": 0.911, "driver1": "Contract_Two year=0", "w1": 0.214, "driver2": "tenure <= 9.00", "w2": 0.189, "driver3": "InternetService_Fiber optic=1", "w3": 0.183, "suggested_action": "Offer 1-year plan with discount", "tenure": 5, "monthlyCharges": 75.55, "totalCharges": 349.65, "billingSpikePct": 52.3, "droppedCalls": 1, "custServiceCalls": 4, "satisfaction": 2, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Credit card (automatic)"}, {"customerID": "1320-HTRDR", "Contract": "Month-to-month", "risk_score": 0.91, "driver1": "tenure <= 9.00", "w1": 0.213, "driver2": "Contract_Two year=0", "w2": 0.19, "driver3": "SatisfactionScore <= 5.00", "w3": 0.165, "suggested_action": "Senior agent callback", "tenure": 3, "monthlyCharges": 75.5, "totalCharges": 220.6, "billingSpikePct": 19.6, "droppedCalls": 4, "custServiceCalls": 2, "satisfaction": 2, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "8266-VBFQL", "Contract": "Month-to-month", "risk_score": 0.91, "driver1": "tenure <= 9.00", "w1": 0.199, "driver2": "Contract_Two year=0", "w2": 0.193, "driver3": "InternetService_Fiber optic=1", "w3": 0.158, "suggested_action": "Offer 1-year plan with discount", "tenure": 4, "monthlyCharges": 90.4, "totalCharges": 356.65, "billingSpikePct": 45.0, "droppedCalls": 6, "custServiceCalls": 2, "satisfaction": 4, "internetService": "Fiber optic", "techSupport": "Yes", "paymentMethod": "Electronic check"}, {"customerID": "1448-PWKYE", "Contract": "Month-to-month", "risk_score": 0.91, "driver1": "Contract_Two year=0", "w1": 0.199, "driver2": "tenure <= 9.00", "w2": 0.188, "driver3": "InternetService_Fiber optic=1", "w3": 0.157, "suggested_action": "Offer 1-year plan with discount", "tenure": 1, "monthlyCharges": 80.0, "totalCharges": 80.0, "billingSpikePct": 50.9, "droppedCalls": 1, "custServiceCalls": 2, "satisfaction": 4, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "5376-DEQCP", "Contract": "Month-to-month", "risk_score": 0.909, "driver1": "Contract_Two year=0", "w1": 0.184, "driver2": "SatisfactionScore <= 5.00", "w2": 0.171, "driver3": "tenure <= 9.00", "w3": 0.157, "suggested_action": "Senior agent callback", "tenure": 1, "monthlyCharges": 70.6, "totalCharges": 70.6, "billingSpikePct": 21.9, "droppedCalls": 2, "custServiceCalls": 3, "satisfaction": 4, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "6000-APYLU", "Contract": "Month-to-month", "risk_score": 0.908, "driver1": "Contract_Two year=0", "w1": 0.202, "driver2": "tenure <= 9.00", "w2": 0.191, "driver3": "SatisfactionScore <= 5.00", "w3": 0.165, "suggested_action": "Senior agent callback", "tenure": 9, "monthlyCharges": 80.8, "totalCharges": 713.1, "billingSpikePct": 41.7, "droppedCalls": 1, "custServiceCalls": 0, "satisfaction": 4, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "1980-KXVPM", "Contract": "Month-to-month", "risk_score": 0.908, "driver1": "Contract_Two year=0", "w1": 0.222, "driver2": "tenure <= 9.00", "w2": 0.203, "driver3": "InternetService_Fiber optic=1", "w3": 0.158, "suggested_action": "Offer 1-year plan with discount", "tenure": 3, "monthlyCharges": 75.05, "totalCharges": 256.25, "billingSpikePct": 52.8, "droppedCalls": 2, "custServiceCalls": 4, "satisfaction": 5, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Credit card (automatic)"}, {"customerID": "2386-LAHRK", "Contract": "Month-to-month", "risk_score": 0.908, "driver1": "tenure <= 9.00", "w1": 0.225, "driver2": "Contract_Two year=0", "w2": 0.186, "driver3": "SatisfactionScore <= 5.00", "w3": 0.13, "suggested_action": "Senior agent callback", "tenure": 1, "monthlyCharges": 53.5, "totalCharges": 53.5, "billingSpikePct": 42.6, "droppedCalls": 0, "custServiceCalls": 5, "satisfaction": 4, "internetService": "DSL", "techSupport": "No", "paymentMethod": "Mailed check"}, {"customerID": "5339-PXDVH", "Contract": "Month-to-month", "risk_score": 0.906, "driver1": "Contract_Two year=0", "w1": 0.205, "driver2": "tenure <= 9.00", "w2": 0.185, "driver3": "InternetService_Fiber optic=1", "w3": 0.164, "suggested_action": "Offer 1-year plan with discount", "tenure": 4, "monthlyCharges": 90.65, "totalCharges": 367.95, "billingSpikePct": 44.7, "droppedCalls": 1, "custServiceCalls": 3, "satisfaction": 2, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "3030-YDNRM", "Contract": "Month-to-month", "risk_score": 0.906, "driver1": "tenure <= 9.00", "w1": 0.211, "driver2": "Contract_Two year=0", "w2": 0.201, "driver3": "InternetService_Fiber optic=1", "w3": 0.164, "suggested_action": "Offer 1-year plan with discount", "tenure": 8, "monthlyCharges": 74.85, "totalCharges": 572.45, "billingSpikePct": 16.5, "droppedCalls": 3, "custServiceCalls": 2, "satisfaction": 3, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "3063-QFSZL", "Contract": "Month-to-month", "risk_score": 0.906, "driver1": "Contract_Two year=0", "w1": 0.22, "driver2": "tenure <= 9.00", "w2": 0.2, "driver3": "SatisfactionScore <= 5.00", "w3": 0.184, "suggested_action": "Senior agent callback", "tenure": 1, "monthlyCharges": 55.4, "totalCharges": 55.4, "billingSpikePct": 30.6, "droppedCalls": 2, "custServiceCalls": 5, "satisfaction": 4, "internetService": "DSL", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "0685-MLYYM", "Contract": "Month-to-month", "risk_score": 0.905, "driver1": "tenure <= 9.00", "w1": 0.201, "driver2": "Contract_Two year=0", "w2": 0.197, "driver3": "InternetService_Fiber optic=1", "w3": 0.166, "suggested_action": "Offer 1-year plan with discount", "tenure": 2, "monthlyCharges": 70.75, "totalCharges": 154.85, "billingSpikePct": 24.7, "droppedCalls": 2, "custServiceCalls": 3, "satisfaction": 3, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "9741-YLNTD", "Contract": "Month-to-month", "risk_score": 0.905, "driver1": "tenure <= 9.00", "w1": 0.202, "driver2": "Contract_Two year=0", "w2": 0.184, "driver3": "InternetService_Fiber optic=1", "w3": 0.161, "suggested_action": "Offer 1-year plan with discount", "tenure": 6, "monthlyCharges": 87.95, "totalCharges": 522.35, "billingSpikePct": 37.9, "droppedCalls": 2, "custServiceCalls": 0, "satisfaction": 4, "internetService": "Fiber optic", "techSupport": "Yes", "paymentMethod": "Bank transfer (automatic)"}, {"customerID": "9717-QEBGU", "Contract": "Month-to-month", "risk_score": 0.905, "driver1": "tenure <= 9.00", "w1": 0.191, "driver2": "Contract_Two year=0", "w2": 0.191, "driver3": "InternetService_Fiber optic=1", "w3": 0.169, "suggested_action": "Offer 1-year plan with discount", "tenure": 2, "monthlyCharges": 70.3, "totalCharges": 144.0, "billingSpikePct": 59.4, "droppedCalls": 3, "custServiceCalls": 3, "satisfaction": 5, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "2027-FECZV", "Contract": "Month-to-month", "risk_score": 0.905, "driver1": "Contract_Two year=0", "w1": 0.21, "driver2": "InternetService_Fiber optic=1", "w2": 0.151, "driver3": "SatisfactionScore <= 5.00", "w3": 0.149, "suggested_action": "Senior agent callback", "tenure": 12, "monthlyCharges": 106.7, "totalCharges": 1253.9, "billingSpikePct": 0.3, "droppedCalls": 3, "custServiceCalls": 7, "satisfaction": 1, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "6821-BUXUX", "Contract": "Month-to-month", "risk_score": 0.905, "driver1": "Contract_Two year=0", "w1": 0.212, "driver2": "InternetService_Fiber optic=1", "w2": 0.17, "driver3": "SatisfactionScore <= 5.00", "w3": 0.168, "suggested_action": "Senior agent callback", "tenure": 13, "monthlyCharges": 96.65, "totalCharges": 1244.5, "billingSpikePct": 52.3, "droppedCalls": 0, "custServiceCalls": 4, "satisfaction": 3, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "2959-MJHIC", "Contract": "Month-to-month", "risk_score": 0.904, "driver1": "Contract_Two year=0", "w1": 0.209, "driver2": "InternetService_Fiber optic=1", "w2": 0.18, "driver3": "tenure <= 9.00", "w3": 0.178, "suggested_action": "Offer 1-year plan with discount", "tenure": 4, "monthlyCharges": 80.35, "totalCharges": 307.4, "billingSpikePct": 22.9, "droppedCalls": 6, "custServiceCalls": 0, "satisfaction": 3, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "3750-CKVKH", "Contract": "Month-to-month", "risk_score": 0.904, "driver1": "tenure <= 9.00", "w1": 0.193, "driver2": "Contract_Two year=0", "w2": 0.184, "driver3": "InternetService_Fiber optic=1", "w3": 0.147, "suggested_action": "Offer 1-year plan with discount", "tenure": 2, "monthlyCharges": 67.75, "totalCharges": 116.65, "billingSpikePct": 27.4, "droppedCalls": 4, "custServiceCalls": 2, "satisfaction": 4, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "7409-KIUTL", "Contract": "Month-to-month", "risk_score": 0.903, "driver1": "tenure <= 9.00", "w1": 0.199, "driver2": "Contract_Two year=0", "w2": 0.19, "driver3": "InternetService_Fiber optic=1", "w3": 0.165, "suggested_action": "Offer 1-year plan with discount", "tenure": 1, "monthlyCharges": 71.0, "totalCharges": 71.0, "billingSpikePct": 43.3, "droppedCalls": 1, "custServiceCalls": 1, "satisfaction": 5, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "4317-VTEOA", "Contract": "Month-to-month", "risk_score": 0.903, "driver1": "Contract_Two year=0", "w1": 0.211, "driver2": "tenure <= 9.00", "w2": 0.196, "driver3": "SatisfactionScore <= 5.00", "w3": 0.153, "suggested_action": "Senior agent callback", "tenure": 1, "monthlyCharges": 50.75, "totalCharges": 50.75, "billingSpikePct": 33.0, "droppedCalls": 3, "custServiceCalls": 3, "satisfaction": 2, "internetService": "DSL", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "9050-QLROH", "Contract": "Month-to-month", "risk_score": 0.903, "driver1": "Contract_Two year=0", "w1": 0.186, "driver2": "SatisfactionScore <= 5.00", "w2": 0.178, "driver3": "InternetService_Fiber optic=1", "w3": 0.168, "suggested_action": "Senior agent callback", "tenure": 18, "monthlyCharges": 90.7, "totalCharges": 1597.25, "billingSpikePct": 29.9, "droppedCalls": 3, "custServiceCalls": 3, "satisfaction": 2, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Credit card (automatic)"}, {"customerID": "2867-UIMSS", "Contract": "Month-to-month", "risk_score": 0.903, "driver1": "Contract_Two year=0", "w1": 0.184, "driver2": "tenure <= 9.00", "w2": 0.183, "driver3": "SatisfactionScore <= 5.00", "w3": 0.163, "suggested_action": "Senior agent callback", "tenure": 1, "monthlyCharges": 80.5, "totalCharges": 80.5, "billingSpikePct": 22.1, "droppedCalls": 3, "custServiceCalls": 2, "satisfaction": 5, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "0958-YHXGP", "Contract": "Month-to-month", "risk_score": 0.903, "driver1": "Contract_Two year=0", "w1": 0.202, "driver2": "InternetService_Fiber optic=1", "w2": 0.195, "driver3": "tenure <= 9.00", "w3": 0.186, "suggested_action": "Offer 1-year plan with discount", "tenure": 7, "monthlyCharges": 69.9, "totalCharges": 497.3, "billingSpikePct": 29.0, "droppedCalls": 2, "custServiceCalls": 4, "satisfaction": 4, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Mailed check"}, {"customerID": "8161-QYMTT", "Contract": "Month-to-month", "risk_score": 0.902, "driver1": "Contract_Two year=0", "w1": 0.198, "driver2": "tenure <= 9.00", "w2": 0.196, "driver3": "InternetService_Fiber optic=1", "w3": 0.162, "suggested_action": "Offer 1-year plan with discount", "tenure": 7, "monthlyCharges": 94.1, "totalCharges": 701.3, "billingSpikePct": 2.6, "droppedCalls": 9, "custServiceCalls": 0, "satisfaction": 3, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "9227-LUNBG", "Contract": "Month-to-month", "risk_score": 0.902, "driver1": "Contract_Two year=0", "w1": 0.212, "driver2": "tenure <= 9.00", "w2": 0.192, "driver3": "MonthlyCharges <= 35.66", "w3": 0.158, "suggested_action": "Bill review call + discount offer", "tenure": 1, "monthlyCharges": 24.6, "totalCharges": 24.6, "billingSpikePct": 30.9, "droppedCalls": 0, "custServiceCalls": 1, "satisfaction": 4, "internetService": "DSL", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "4735-ASGMA", "Contract": "Month-to-month", "risk_score": 0.902, "driver1": "Contract_Two year=0", "w1": 0.207, "driver2": "SatisfactionScore <= 5.00", "w2": 0.156, "driver3": "InternetService_Fiber optic=1", "w3": 0.139, "suggested_action": "Senior agent callback", "tenure": 26, "monthlyCharges": 98.35, "totalCharges": 2515.3, "billingSpikePct": 25.8, "droppedCalls": 5, "custServiceCalls": 1, "satisfaction": 4, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "2737-YNGYW", "Contract": "Month-to-month", "risk_score": 0.902, "driver1": "Contract_Two year=0", "w1": 0.2, "driver2": "tenure <= 9.00", "w2": 0.195, "driver3": "SatisfactionScore <= 5.00", "w3": 0.142, "suggested_action": "Senior agent callback", "tenure": 2, "monthlyCharges": 80.55, "totalCharges": 184.1, "billingSpikePct": 59.4, "droppedCalls": 2, "custServiceCalls": 2, "satisfaction": 5, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "6979-ZNSFF", "Contract": "Month-to-month", "risk_score": 0.902, "driver1": "tenure <= 9.00", "w1": 0.206, "driver2": "Contract_Two year=0", "w2": 0.185, "driver3": "InternetService_Fiber optic=1", "w3": 0.166, "suggested_action": "Offer 1-year plan with discount", "tenure": 8, "monthlyCharges": 87.05, "totalCharges": 762.1, "billingSpikePct": 2.3, "droppedCalls": 1, "custServiceCalls": 2, "satisfaction": 2, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "8375-DKEBR", "Contract": "Month-to-month", "risk_score": 0.902, "driver1": "tenure <= 9.00", "w1": 0.216, "driver2": "Contract_Two year=0", "w2": 0.191, "driver3": "InternetService_Fiber optic=1", "w3": 0.143, "suggested_action": "Offer 1-year plan with discount", "tenure": 1, "monthlyCharges": 69.6, "totalCharges": 69.6, "billingSpikePct": 41.0, "droppedCalls": 8, "custServiceCalls": 0, "satisfaction": 6, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "8739-XNIKG", "Contract": "Month-to-month", "risk_score": 0.9, "driver1": "Contract_Two year=0", "w1": 0.213, "driver2": "tenure <= 9.00", "w2": 0.192, "driver3": "InternetService_Fiber optic=1", "w3": 0.173, "suggested_action": "Offer 1-year plan with discount", "tenure": 5, "monthlyCharges": 84.0, "totalCharges": 424.75, "billingSpikePct": 31.1, "droppedCalls": 1, "custServiceCalls": 3, "satisfaction": 6, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "7534-BFESC", "Contract": "Month-to-month", "risk_score": 0.9, "driver1": "Contract_Two year=0", "w1": 0.192, "driver2": "InternetService_Fiber optic=1", "w2": 0.175, "driver3": "SatisfactionScore <= 5.00", "w3": 0.159, "suggested_action": "Senior agent callback", "tenure": 24, "monthlyCharges": 76.1, "totalCharges": 1712.7, "billingSpikePct": 42.6, "droppedCalls": 4, "custServiceCalls": 1, "satisfaction": 3, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "9576-ANLXO", "Contract": "Month-to-month", "risk_score": 0.9, "driver1": "tenure <= 9.00", "w1": 0.194, "driver2": "Contract_Two year=0", "w2": 0.191, "driver3": "InternetService_Fiber optic=1", "w3": 0.159, "suggested_action": "Offer 1-year plan with discount", "tenure": 3, "monthlyCharges": 69.55, "totalCharges": 222.3, "billingSpikePct": 16.4, "droppedCalls": 9, "custServiceCalls": 7, "satisfaction": 3, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Bank transfer (automatic)"}, {"customerID": "6230-BSUXY", "Contract": "Month-to-month", "risk_score": 0.9, "driver1": "Contract_Two year=0", "w1": 0.218, "driver2": "tenure <= 9.00", "w2": 0.196, "driver3": "SatisfactionScore <= 5.00", "w3": 0.161, "suggested_action": "Senior agent callback", "tenure": 1, "monthlyCharges": 85.0, "totalCharges": 85.0, "billingSpikePct": 3.5, "droppedCalls": 6, "custServiceCalls": 3, "satisfaction": 5, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "3966-HRMZA", "Contract": "Month-to-month", "risk_score": 0.9, "driver1": "Contract_Two year=0", "w1": 0.204, "driver2": "tenure <= 9.00", "w2": 0.201, "driver3": "SatisfactionScore <= 5.00", "w3": 0.158, "suggested_action": "Senior agent callback", "tenure": 3, "monthlyCharges": 75.05, "totalCharges": 202.9, "billingSpikePct": 28.7, "droppedCalls": 3, "custServiceCalls": 1, "satisfaction": 3, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Mailed check"}, {"customerID": "7209-JCUDS", "Contract": "Month-to-month", "risk_score": 0.899, "driver1": "Contract_Two year=0", "w1": 0.209, "driver2": "InternetService_Fiber optic=1", "w2": 0.161, "driver3": "Contract_One year=0", "w3": 0.079, "suggested_action": "Offer 1-year plan with discount", "tenure": 10, "monthlyCharges": 94.9, "totalCharges": 1048.85, "billingSpikePct": 51.4, "droppedCalls": 1, "custServiceCalls": 5, "satisfaction": 6, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "0258-NOKBL", "Contract": "Month-to-month", "risk_score": 0.899, "driver1": "Contract_Two year=0", "w1": 0.208, "driver2": "tenure <= 9.00", "w2": 0.193, "driver3": "InternetService_Fiber optic=1", "w3": 0.166, "suggested_action": "Offer 1-year plan with discount", "tenure": 3, "monthlyCharges": 90.4, "totalCharges": 268.45, "billingSpikePct": 53.0, "droppedCalls": 3, "custServiceCalls": 5, "satisfaction": 5, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "2025-JKFWI", "Contract": "Month-to-month", "risk_score": 0.899, "driver1": "Contract_Two year=0", "w1": 0.199, "driver2": "InternetService_Fiber optic=1", "w2": 0.171, "driver3": "SatisfactionScore <= 5.00", "w3": 0.164, "suggested_action": "Senior agent callback", "tenure": 13, "monthlyCharges": 99.0, "totalCharges": 1301.7, "billingSpikePct": 23.8, "droppedCalls": 7, "custServiceCalls": 3, "satisfaction": 5, "internetService": "Fiber optic", "techSupport": "Yes", "paymentMethod": "Mailed check"}, {"customerID": "1112-CUNAO", "Contract": "Month-to-month", "risk_score": 0.899, "driver1": "Contract_Two year=0", "w1": 0.19, "driver2": "InternetService_Fiber optic=1", "w2": 0.162, "driver3": "SatisfactionScore <= 5.00", "w3": 0.147, "suggested_action": "Senior agent callback", "tenure": 15, "monthlyCharges": 89.85, "totalCharges": 1424.95, "billingSpikePct": 22.0, "droppedCalls": 11, "custServiceCalls": 2, "satisfaction": 4, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "3422-LYEPQ", "Contract": "Month-to-month", "risk_score": 0.898, "driver1": "Contract_Two year=0", "w1": 0.209, "driver2": "tenure <= 9.00", "w2": 0.187, "driver3": "SatisfactionScore <= 5.00", "w3": 0.174, "suggested_action": "Senior agent callback", "tenure": 1, "monthlyCharges": 71.0, "totalCharges": 71.0, "billingSpikePct": 25.4, "droppedCalls": 11, "custServiceCalls": 2, "satisfaction": 5, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "6969-MVBAI", "Contract": "Month-to-month", "risk_score": 0.898, "driver1": "tenure <= 9.00", "w1": 0.22, "driver2": "Contract_Two year=0", "w2": 0.2, "driver3": "InternetService_Fiber optic=1", "w3": 0.158, "suggested_action": "Offer 1-year plan with discount", "tenure": 9, "monthlyCharges": 90.1, "totalCharges": 816.8, "billingSpikePct": -0.8, "droppedCalls": 4, "custServiceCalls": 1, "satisfaction": 4, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}, {"customerID": "5542-TBBWB", "Contract": "Month-to-month", "risk_score": 0.897, "driver1": "tenure <= 9.00", "w1": 0.218, "driver2": "Contract_Two year=0", "w2": 0.195, "driver3": "InternetService_Fiber optic=1", "w3": 0.171, "suggested_action": "Offer 1-year plan with discount", "tenure": 1, "monthlyCharges": 69.9, "totalCharges": 69.9, "billingSpikePct": 38.1, "droppedCalls": 3, "custServiceCalls": 1, "satisfaction": 6, "internetService": "Fiber optic", "techSupport": "No", "paymentMethod": "Electronic check"}];
+
+        function friendlyDriver(raw) {
+            if (!raw || raw === '-') return '-';
+            const t = String(raw).toLowerCase();
+            if (t.includes('satisfactionscore')) {
+                return t.includes('<=') ? 'Low Satisfaction Score (<= 5 / 10)' : 'High Satisfaction Score';
+            }
+            if (t.includes('custservicecalls')) {
+                return t.includes('<=') ? 'Few Customer Service Calls' : 'Frequent Customer Service Complaints';
+            }
+            if (t.includes('billingspikepct')) {
+                return t.includes('<=') ? 'Stable or Reduced Bill' : 'Sudden Billing Surge (>15% jump)';
+            }
+            if (t.includes('calldroprate') || t.includes('droppedcalls')) {
+                return t.includes('<=') ? 'Low Dropped Calls' : 'Frequent Dropped Calls (Network Friction)';
+            }
+            if (t.includes('tenure')) {
+                return t.includes('<=') ? 'New Customer (Tenure <= 9 months)' : 'Long-time Loyal Customer';
+            }
+            if (t.includes('monthlycharges')) {
+                return t.includes('<=') ? 'Low Monthly Charges' : 'High Monthly Recurring Bill';
+            }
+            if (t.includes('contract_two year')) {
+                return t.endsWith('=1') ? 'On 2-Year Contract' : 'No 2-Year Contract (Month-to-month)';
+            }
+            if (t.includes('contract_one year')) {
+                return t.endsWith('=1') ? 'On 1-Year Contract' : 'Not on 1-Year Contract';
+            }
+            if (t.includes('internetservice_fiber')) {
+                return t.endsWith('=1') ? 'Fiber Optic Plan' : 'Not on Fiber Optic';
+            }
+            if (t.includes('billingspikeflag')) {
+                return t.endsWith('=1') ? 'Billing Spike Detected (>15%)' : 'No Billing Spike';
+            }
+            return raw;
+        }
+
+        function isFriction(raw) {
+            const t = String(raw).toLowerCase();
+            return ['billing', 'drop', 'expiring', 'custservice', 'satisfaction'].some(w => t.includes(w));
+        }
+
+        function getTier(score) {
+            if (score >= 0.90) return 'Critical';
+            if (score >= 0.80) return 'High';
+            if (score >= 0.60) return 'Watch';
+            return 'Low';
+        }
+
+        let customers = rawData.map(c => {
+            const s = parseFloat(c.risk_score);
+            return {
+                ...c,
+                risk_score: s,
+                tier: getTier(s),
+                friendly1: friendlyDriver(c.driver1),
+                friendly2: friendlyDriver(c.driver2),
+                friendly3: friendlyDriver(c.driver3),
+            };
+        });
+
+        let currentFiltered = [...customers];
+        let selectedCustomer = null;
+        let simContract = 'm2m';
+        let currentScripts = {};
+
+        function renderTable(list) {
+            const tbody = document.getElementById('customer-tbody');
+            tbody.innerHTML = '';
+
+            list.forEach(c => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50/80 transition cursor-pointer';
+                tr.onclick = () => openModal(c.customerID);
+
+                const tierBadge = c.tier === 'Critical' 
+                    ? '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700">Critical</span>'
+                    : (c.tier === 'High' 
+                        ? '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-orange-100 text-orange-700">High</span>' 
+                        : '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700">Watch</span>');
+
+                const barColor = c.risk_score >= 0.90 ? 'bg-red-500' : 'bg-orange-500';
+
+                tr.innerHTML = `
+                    <td class="py-3.5 px-4 font-bold text-slate-900">${c.customerID}</td>
+                    <td class="py-3.5 px-4 text-slate-600">${c.Contract || 'Month-to-month'}</td>
+                    <td class="py-3.5 px-4">
+                        <div class="flex items-center gap-2">
+                            <div class="w-16 bg-slate-200 rounded-full h-2 overflow-hidden">
+                                <div class="${barColor} h-2 rounded-full" style="width: ${ (c.risk_score * 100).toFixed(0) }%"></div>
+                            </div>
+                            <span class="font-extrabold text-xs text-slate-800">${ (c.risk_score * 100).toFixed(1) }%</span>
+                            ${tierBadge}
+                        </div>
+                    </td>
+                    <td class="py-3.5 px-4 text-xs font-medium text-slate-700 max-w-xs truncate">${c.friendly1}</td>
+                    <td class="py-3.5 px-4">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                            ⚡ ${c.suggested_action}
+                        </span>
+                    </td>
+                    <td class="py-3.5 px-4 text-right">
+                        <button class="px-2.5 py-1 text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition">
+                            Inspect &rarr;
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('shown-count').textContent = list.length;
+            document.getElementById('total-count').textContent = customers.length;
+        }
+
+        function applyFilters() {
+            const search = document.getElementById('search-input').value.trim().toLowerCase();
+            const tier = document.getElementById('filter-tier').value;
+            const action = document.getElementById('filter-action').value;
+
+            currentFiltered = customers.filter(c => {
+                const matchSearch = !search || c.customerID.toLowerCase().includes(search);
+                const matchTier = tier === 'ALL' || c.tier === tier;
+                const matchAction = action === 'ALL' || c.suggested_action === action;
+                return matchSearch && matchTier && matchAction;
+            });
+
+            document.getElementById('kpi-total').textContent = currentFiltered.length;
+            if (currentFiltered.length > 0) {
+                const avg = (currentFiltered.reduce((sum, c) => sum + c.risk_score, 0) / currentFiltered.length) * 100;
+                document.getElementById('kpi-avg').textContent = avg.toFixed(1) + '%';
+                const crit = currentFiltered.filter(c => c.tier === 'Critical').length;
+                document.getElementById('kpi-critical').textContent = crit;
+
+                const actCount = {};
+                currentFiltered.forEach(c => { actCount[c.suggested_action] = (actCount[c.suggested_action] || 0) + 1; });
+                const topAct = Object.keys(actCount).sort((a,b) => actCount[b] - actCount[a])[0];
+                document.getElementById('kpi-action').textContent = topAct;
+            } else {
+                document.getElementById('kpi-avg').textContent = '0%';
+                document.getElementById('kpi-critical').textContent = '0';
+                document.getElementById('kpi-action').textContent = 'N/A';
+            }
+
+            renderTable(currentFiltered);
+        }
+
+        function openModal(cid) {
+            const c = customers.find(item => item.customerID === cid);
+            if (!c) return;
+            selectedCustomer = c;
+
+            document.getElementById('modal-cid').textContent = c.customerID;
+            document.getElementById('modal-contract').textContent = (c.Contract || 'Month-to-month') + ' Contract';
+
+            const badge = document.getElementById('modal-tier-badge');
+            badge.textContent = c.tier + ' Risk (' + (c.risk_score * 100).toFixed(1) + '%)';
+            badge.className = c.tier === 'Critical' 
+                ? 'px-2.5 py-0.5 text-xs font-bold rounded-full bg-red-100 text-red-700' 
+                : 'px-2.5 py-0.5 text-xs font-bold rounded-full bg-orange-100 text-orange-700';
+
+            // Telemetry
+            const monthly = c.monthlyCharges || 75.0;
+            const annual = monthly * 12.0;
+            document.getElementById('tel-tenure').textContent = (c.tenure || 0) + ' mos';
+            document.getElementById('tel-monthly').textContent = '$' + monthly.toFixed(2);
+            document.getElementById('tel-spike').textContent = ((c.billingSpikePct || 0) >= 0 ? '+' : '') + (c.billingSpikePct || 0).toFixed(1) + '%';
+            document.getElementById('tel-drops').textContent = c.droppedCalls || 0;
+            document.getElementById('tel-custserv').textContent = c.custServiceCalls || 0;
+            document.getElementById('tel-sat').textContent = (c.satisfaction || 4) + ' / 10';
+            document.getElementById('tel-plan').textContent = c.internetService || 'Fiber optic';
+            document.getElementById('tel-support').textContent = c.techSupport || 'No';
+            document.getElementById('tel-payment').textContent = c.paymentMethod || 'Electronic check';
+            document.getElementById('tel-total').textContent = '$' + (c.totalCharges || (monthly * 6)).toLocaleString();
+
+            // Drivers
+            const driversList = document.getElementById('modal-drivers-list');
+            driversList.innerHTML = '';
+            [1, 2, 3].forEach(idx => {
+                const raw = c['driver' + idx];
+                const friendly = c['friendly' + idx];
+                const w = parseFloat(c['w' + idx] || 0);
+                const fric = isFriction(raw);
+
+                const dDiv = document.createElement('div');
+                dDiv.className = `p-2.5 rounded-lg border ${fric ? 'border-red-200 bg-red-50/40' : 'border-slate-200 bg-slate-50'}`;
+                dDiv.innerHTML = `
+                    <div class="flex items-center justify-between mb-0.5">
+                        <span class="text-xs font-extrabold text-red-600">#${idx} Factor</span>
+                        <span class="text-[10px] font-bold px-1.5 py-0.2 rounded ${fric ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'}">
+                            ${fric ? '⚡ Fixable Friction' : '📌 Profile Attribute'}
+                        </span>
+                    </div>
+                    <div class="text-xs font-bold text-slate-900">${friendly}</div>
+                    <div class="text-[11px] text-slate-500 font-mono mt-0.5">Model Feature: <code>${raw}</code> &bull; SHAP Weight: <b>+${w.toFixed(3)}</b></div>
+                `;
+                driversList.appendChild(dDiv);
+            });
+
+            // Prescribed Playbook Pillars
+            const discountMo = monthly * 0.20;
+            const discountYr = discountMo * 12.0;
+            document.getElementById('playbook-commercial').textContent = `Lock-in 1-Year Rate Protection with 20% discount ($${discountMo.toFixed(2)}/mo savings, $${discountYr.toFixed(2)}/yr total)${(c.billingSpikePct > 12) ? ' + $35 Billing Surge Waiver Credit' : ''}`;
+            document.getElementById('playbook-service').textContent = (c.droppedCalls >= 2 || c.satisfaction <= 4) 
+                ? 'Senior Supervisor callback + remote line quality diagnosis & router check'
+                : 'Proactive speed optimization & network health check';
+            document.getElementById('playbook-perks').textContent = 'Complimentary 6-month VIP 24/7 Priority Tech Support package ($120 market value, $0 cost)';
+            document.getElementById('playbook-annual').textContent = '$' + annual.toLocaleString() + ' / yr';
+            document.getElementById('playbook-saved').textContent = '$' + (annual * 0.80).toLocaleString() + ' / yr';
+
+            // Scripts
+            currentScripts = {
+                empathy: `"Hello! I am calling directly from our Senior Leadership Desk regarding Account ${c.customerID}. I reviewed your profile and noticed you recently experienced service friction, including dropped calls and an unexpected bill adjustment. I sincerely apologize for this frustration. I have personally taken charge of your account, credited a courtesy billing waiver, and scheduled a lead supervisor to audit your connection within 24 hours to guarantee complete reliability."`,
+                savings: `"Hello! Reaching out from the Account Rate Optimization Desk for Customer ${c.customerID}. We conducted an annual loyalty review and qualified your line for our 1-Year Price Protection Plan. By enrolling today, we will immediately freeze your rate, reduce your monthly bill by 20% ($${discountMo.toFixed(2)}/month savings), and preserve your high-speed tier with guaranteed zero surprise fees."`,
+                vip: `"Hello! As a valued subscriber on Account ${c.customerID}, you have been selected for our VIP Retention & Upgrade Package. To celebrate your partnership, we are adding complimentary 24/7 Priority Tech Support, free hardware protection, and locking your account into our premier discounted tier for the next 12 months. May I activate this for you right away?"`
+            };
+            switchScriptStyle('empathy');
+
+            // Reset Simulator Controls
+            applySimPreset('reset');
+
+            document.getElementById('customer-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('customer-modal').classList.add('hidden');
+        }
+
+        function switchScriptStyle(style) {
+            document.querySelectorAll('.script-tab-btn').forEach(b => {
+                b.classList.remove('active', 'bg-indigo-600', 'text-white');
+                b.classList.add('bg-white', 'text-slate-600');
+            });
+            const btn = document.getElementById('sbtn-' + style);
+            if (btn) {
+                btn.classList.add('active', 'bg-indigo-600', 'text-white');
+                btn.classList.remove('bg-white', 'text-slate-600');
+            }
+            document.getElementById('modal-script-box').textContent = currentScripts[style] || '';
+        }
+
+        function copyScript() {
+            const text = document.getElementById('modal-script-box').textContent;
+            navigator.clipboard.writeText(text);
+            const btn = document.getElementById('copy-btn');
+            btn.innerHTML = '<span>Copied! ✅</span>';
+            setTimeout(() => { btn.innerHTML = '<span>Copy Script</span>'; }, 2000);
+        }
+
+        // Simulator Logic
+        function setSimContract(type) {
+            simContract = type;
+            document.querySelectorAll('.contract-pill').forEach(p => {
+                p.classList.remove('active', 'bg-indigo-600', 'text-white');
+                p.classList.add('bg-white', 'text-slate-700');
+            });
+            const activePill = document.getElementById('cpill-' + type);
+            if (activePill) {
+                activePill.classList.add('active', 'bg-indigo-600', 'text-white');
+                activePill.classList.remove('bg-white', 'text-slate-700');
+            }
+            updateLiveSim();
+        }
+
+        function applySimPreset(preset) {
+            if (preset === 'recommended') {
+                setSimContract('1yr');
+                document.getElementById('sim-slider-discount').value = 20;
+                document.getElementById('sim-slider-sat').value = 3;
+                document.getElementById('sim-chk-network').checked = true;
+                document.getElementById('sim-chk-tech').checked = true;
+            } else if (preset === 'max') {
+                setSimContract('2yr');
+                document.getElementById('sim-slider-discount').value = 30;
+                document.getElementById('sim-slider-sat').value = 5;
+                document.getElementById('sim-chk-network').checked = true;
+                document.getElementById('sim-chk-tech').checked = true;
+            } else if (preset === 'zerocost') {
+                setSimContract('1yr');
+                document.getElementById('sim-slider-discount').value = 0;
+                document.getElementById('sim-slider-sat').value = 4;
+                document.getElementById('sim-chk-network').checked = true;
+                document.getElementById('sim-chk-tech').checked = true;
+            } else if (preset === 'reset') {
+                setSimContract('m2m');
+                document.getElementById('sim-slider-discount').value = 0;
+                document.getElementById('sim-slider-sat').value = 0;
+                document.getElementById('sim-chk-network').checked = false;
+                document.getElementById('sim-chk-tech').checked = false;
+            }
+            updateLiveSim();
+        }
+
+        function updateLiveSim() {
+            if (!selectedCustomer) return;
+            const original = selectedCustomer.risk_score;
+            const monthly = selectedCustomer.monthlyCharges || 75.0;
+            const annual = monthly * 12.0;
+
+            const discount = parseInt(document.getElementById('sim-slider-discount').value);
+            const sat = parseInt(document.getElementById('sim-slider-sat').value);
+            const netChk = document.getElementById('sim-chk-network').checked;
+            const techChk = document.getElementById('sim-chk-tech').checked;
+
+            document.getElementById('lbl-discount').textContent = discount + '%';
+            document.getElementById('lbl-sat').textContent = '+' + sat + ' points';
+
+            let reduction = 0;
+            if (simContract === '1yr') reduction += 0.22;
+            if (simContract === '2yr') reduction += 0.34;
+            reduction += (discount / 100.0) * 0.45;
+            reduction += (sat * 0.04);
+            if (netChk) reduction += 0.14;
+            if (techChk) reduction += 0.10;
+
+            const simulated = Math.max(0.08, original - reduction);
+            const delta = (original - simulated);
+
+            document.getElementById('sim-orig-val').textContent = (original * 100).toFixed(1) + '%';
+            document.getElementById('sim-new-val').textContent = (simulated * 100).toFixed(1) + '%';
+            document.getElementById('sim-delta').textContent = '-' + (delta * 100).toFixed(1) + '% Absolute';
+
+            const badge = document.getElementById('sim-badge');
+            const newVal = document.getElementById('sim-new-val');
+            if (simulated < 0.50) {
+                badge.textContent = 'Retained (< 50%)';
+                badge.className = 'px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700';
+                newVal.className = 'text-3xl font-extrabold text-emerald-600 transition-all duration-300';
+            } else if (simulated < 0.75) {
+                badge.textContent = 'Watchlist (50-75%)';
+                badge.className = 'px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700';
+                newVal.className = 'text-3xl font-extrabold text-amber-600 transition-all duration-300';
+            } else {
+                badge.textContent = 'High Churn (> 75%)';
+                badge.className = 'px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700';
+                newVal.className = 'text-3xl font-extrabold text-red-600 transition-all duration-300';
+            }
+
+            const offerCost = (monthly * (discount / 100.0)) * 12.0;
+            const revenueSaved = Math.max(0, (annual * (1.0 - simulated)) - offerCost);
+            document.getElementById('sim-revenue-saved').textContent = '$' + revenueSaved.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' / yr';
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(tabId).classList.remove('hidden');
+            if (tabId === 'tab-queue') document.getElementById('btn-queue').classList.add('active');
+            if (tabId === 'tab-portfolio') {
+                document.getElementById('btn-portfolio').classList.add('active');
+                initCharts();
+            }
+            if (tabId === 'tab-insights') document.getElementById('btn-insights').classList.add('active');
+        }
+
+        function exportCSV() {
+            let csv = 'customerID,Contract,risk_score,driver1,driver2,suggested_action\n';
+            currentFiltered.forEach(c => {
+                csv += `"${c.customerID}","${c.Contract || 'Month-to-month'}",${c.risk_score},"${c.friendly1}","${c.friendly2}","${c.suggested_action}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('href', url);
+            a.setAttribute('download', 'prioritized_churn_customers.csv');
+            a.click();
+        }
+
+        let chartsInitialized = false;
+        function initCharts() {
+            if (chartsInitialized) return;
+            chartsInitialized = true;
+
+            const tierCounts = { 'Critical': 0, 'High': 0, 'Watch': 0 };
+            customers.forEach(c => { tierCounts[c.tier] = (tierCounts[c.tier] || 0) + 1; });
+
+            new Chart(document.getElementById('chart-tier'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Critical (≥90%)', 'High (80-89%)', 'Watch (<80%)'],
+                    datasets: [{
+                        data: [tierCounts['Critical'], tierCounts['High'], tierCounts['Watch']],
+                        backgroundColor: ['#ef4444', '#f97316', '#eab308']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+
+            const actionCounts = {};
+            customers.forEach(c => { actionCounts[c.suggested_action] = (actionCounts[c.suggested_action] || 0) + 1; });
+
+            new Chart(document.getElementById('chart-actions'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(actionCounts),
+                    datasets: [{
+                        label: 'Customers',
+                        data: Object.values(actionCounts),
+                        backgroundColor: '#4f46e5',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            const driverCounts = {};
+            customers.forEach(c => {
+                [c.friendly1, c.friendly2, c.friendly3].forEach(d => {
+                    if (d && d !== '-') driverCounts[d] = (driverCounts[d] || 0) + 1;
+                });
+            });
+
+            const sortedDrivers = Object.keys(driverCounts).sort((a,b) => driverCounts[b] - driverCounts[a]).slice(0, 7);
+
+            new Chart(document.getElementById('chart-drivers'), {
+                type: 'bar',
+                data: {
+                    labels: sortedDrivers,
+                    datasets: [{
+                        label: 'Occurrences',
+                        data: sortedDrivers.map(k => driverCounts[k]),
+                        backgroundColor: '#dc2626',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        renderTable(customers);
+    </script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+customerID,Contract,risk_score,driver1,w1,driver2,w2,driver3,w3,suggested_action
+0970-ETWGE,Month-to-month,0.937,Contract_Two year=0,0.201,tenure <= 9.00,0.188,SatisfactionScore <= 5.00,0.181,Senior agent callback
+6861-XWTWQ,Month-to-month,0.935,tenure <= 9.00,0.191,Contract_Two year=0,0.19,SatisfactionScore <= 5.00,0.154,Senior agent callback
+8884-ADFVN,Month-to-month,0.933,Contract_Two year=0,0.194,tenure <= 9.00,0.181,InternetService_Fiber optic=1,0.165,Offer 1-year plan with discount
+4342-HENTK,Month-to-month,0.933,tenure <= 9.00,0.198,Contract_Two year=0,0.192,SatisfactionScore <= 5.00,0.176,Senior agent callback
+3519-ZKXGG,Month-to-month,0.932,tenure <= 9.00,0.204,Contract_Two year=0,0.201,InternetService_Fiber optic=1,0.15,Offer 1-year plan with discount
+2865-TCHJW,Month-to-month,0.932,tenure <= 9.00,0.204,Contract_Two year=0,0.199,InternetService_Fiber optic=1,0.158,Offer 1-year plan with discount
+9248-OJYKK,Month-to-month,0.931,tenure <= 9.00,0.195,Contract_Two year=0,0.193,InternetService_Fiber optic=1,0.156,Offer 1-year plan with discount
+9057-SIHCH,Month-to-month,0.931,Contract_Two year=0,0.206,tenure <= 9.00,0.187,SatisfactionScore <= 5.00,0.17,Senior agent callback
+8361-LTMKD,Month-to-month,0.93,Contract_Two year=0,0.223,tenure <= 9.00,0.2,SatisfactionScore <= 5.00,0.163,Senior agent callback
+2514-GINMM,Month-to-month,0.93,Contract_Two year=0,0.192,tenure <= 9.00,0.18,InternetService_Fiber optic=1,0.17,Offer 1-year plan with discount
+8245-UMPYT,Month-to-month,0.93,Contract_Two year=0,0.208,InternetService_Fiber optic=1,0.154,SatisfactionScore <= 5.00,0.149,Senior agent callback
+1400-MMYXY,Month-to-month,0.929,Contract_Two year=0,0.198,tenure <= 9.00,0.175,InternetService_Fiber optic=1,0.155,Offer 1-year plan with discount
+9611-CTWIH,Month-to-month,0.928,Contract_Two year=0,0.203,tenure <= 9.00,0.185,SatisfactionScore <= 5.00,0.166,Senior agent callback
+4750-ZRXIU,Month-to-month,0.928,Contract_Two year=0,0.19,tenure <= 9.00,0.18,InternetService_Fiber optic=1,0.168,Offer 1-year plan with discount
+9747-DDZOS,Month-to-month,0.928,tenure <= 9.00,0.201,Contract_Two year=0,0.181,InternetService_Fiber optic=1,0.172,Offer 1-year plan with discount
+0390-DCFDQ,Month-to-month,0.927,Contract_Two year=0,0.208,tenure <= 9.00,0.194,SatisfactionScore <= 5.00,0.159,Senior agent callback
+1069-XAIEM,Month-to-month,0.926,Contract_Two year=0,0.202,tenure <= 9.00,0.187,SatisfactionScore <= 5.00,0.175,Senior agent callback
+3722-WPXTK,Month-to-month,0.926,tenure <= 9.00,0.212,Contract_Two year=0,0.187,InternetService_Fiber optic=1,0.169,Offer 1-year plan with discount
+6857-VWJDT,Month-to-month,0.925,Contract_Two year=0,0.186,tenure <= 9.00,0.185,SatisfactionScore <= 5.00,0.162,Senior agent callback
+4115-NZRKS,Month-to-month,0.925,tenure <= 9.00,0.213,Contract_Two year=0,0.211,SatisfactionScore <= 5.00,0.16,Senior agent callback
+5196-SGOAK,Month-to-month,0.925,tenure <= 9.00,0.216,Contract_Two year=0,0.187,InternetService_Fiber optic=1,0.162,Offer 1-year plan with discount
+2609-IAICY,Month-to-month,0.924,Contract_Two year=0,0.212,tenure <= 9.00,0.207,InternetService_Fiber optic=1,0.158,Offer 1-year plan with discount
+3320-VEOYC,Month-to-month,0.924,Contract_Two year=0,0.215,InternetService_Fiber optic=1,0.159,SatisfactionScore <= 5.00,0.149,Senior agent callback
+3716-BDVDB,Month-to-month,0.924,Contract_Two year=0,0.191,tenure <= 9.00,0.179,InternetService_Fiber optic=1,0.163,Offer 1-year plan with discount
+1820-TQVEV,Month-to-month,0.923,Contract_Two year=0,0.22,tenure <= 9.00,0.19,SatisfactionScore <= 5.00,0.183,Senior agent callback
+5186-SAMNZ,Month-to-month,0.923,Contract_Two year=0,0.203,tenure <= 9.00,0.174,InternetService_Fiber optic=1,0.163,Offer 1-year plan with discount
+0295-PPHDO,Month-to-month,0.922,tenure <= 9.00,0.204,Contract_Two year=0,0.197,InternetService_Fiber optic=1,0.157,Offer 1-year plan with discount
+7005-CCBKV,Month-to-month,0.922,tenure <= 9.00,0.194,Contract_Two year=0,0.192,SatisfactionScore <= 5.00,0.169,Senior agent callback
+1143-NMNQJ,Month-to-month,0.922,Contract_Two year=0,0.212,tenure <= 9.00,0.187,InternetService_Fiber optic=1,0.14,Offer 1-year plan with discount
+5442-BHQNG,Month-to-month,0.921,tenure <= 9.00,0.215,Contract_Two year=0,0.188,SatisfactionScore <= 5.00,0.159,Senior agent callback
+2754-SDJRD,Month-to-month,0.921,Contract_Two year=0,0.216,tenure <= 9.00,0.193,SatisfactionScore <= 5.00,0.16,Senior agent callback
+4229-CZMLL,Month-to-month,0.921,Contract_Two year=0,0.215,tenure <= 9.00,0.198,SatisfactionScore <= 5.00,0.168,Senior agent callback
+5178-LMXOP,Month-to-month,0.921,Contract_Two year=0,0.211,tenure <= 9.00,0.209,InternetService_Fiber optic=1,0.165,Offer 1-year plan with discount
+8443-ZRDBZ,Month-to-month,0.92,tenure <= 9.00,0.203,Contract_Two year=0,0.194,InternetService_Fiber optic=1,0.141,Offer 1-year plan with discount
+2254-DLXRI,Month-to-month,0.919,Contract_Two year=0,0.211,tenure <= 9.00,0.195,InternetService_Fiber optic=1,0.155,Offer 1-year plan with discount
+1768-ZAIFU,Month-to-month,0.919,tenure <= 9.00,0.184,Contract_Two year=0,0.184,MonthlyCharges <= 35.66,0.168,Bill review call + discount offer
+4806-KEXQR,Month-to-month,0.918,Contract_Two year=0,0.208,tenure <= 9.00,0.198,SatisfactionScore <= 5.00,0.162,Senior agent callback
+4713-LZDRV,Month-to-month,0.917,Contract_Two year=0,0.206,tenure <= 9.00,0.194,SatisfactionScore <= 5.00,0.158,Senior agent callback
+7571-YXDAD,Month-to-month,0.916,Contract_Two year=0,0.188,tenure <= 9.00,0.187,SatisfactionScore <= 5.00,0.158,Senior agent callback
+6899-PPEEA,Month-to-month,0.916,Contract_Two year=0,0.202,SatisfactionScore <= 5.00,0.179,InternetService_Fiber optic=1,0.133,Senior agent callback
+6023-YEBUP,Month-to-month,0.915,Contract_Two year=0,0.213,tenure <= 9.00,0.209,InternetService_Fiber optic=1,0.156,Offer 1-year plan with discount
+3707-GNWHM,Month-to-month,0.915,Contract_Two year=0,0.211,tenure <= 9.00,0.186,InternetService_Fiber optic=1,0.16,Offer 1-year plan with discount
+9507-EXLTT,Month-to-month,0.915,Contract_Two year=0,0.216,tenure <= 9.00,0.19,InternetService_Fiber optic=1,0.165,Offer 1-year plan with discount
+2754-XBHTB,Month-to-month,0.914,Contract_Two year=0,0.2,tenure <= 9.00,0.193,SatisfactionScore <= 5.00,0.159,Senior agent callback
+7218-HKQFK,Month-to-month,0.914,Contract_Two year=0,0.203,tenure <= 9.00,0.182,SatisfactionScore <= 5.00,0.158,Senior agent callback
+3677-IYRBF,Month-to-month,0.914,tenure <= 9.00,0.204,Contract_Two year=0,0.202,SatisfactionScore <= 5.00,0.172,Senior agent callback
+7249-WBIYX,Month-to-month,0.914,Contract_Two year=0,0.203,SatisfactionScore <= 5.00,0.17,InternetService_Fiber optic=1,0.168,Senior agent callback
+3199-XGZCY,Month-to-month,0.913,Contract_Two year=0,0.2,tenure <= 9.00,0.184,SatisfactionScore <= 5.00,0.167,Senior agent callback
+6372-RFVNS,Month-to-month,0.913,Contract_Two year=0,0.206,tenure <= 9.00,0.199,InternetService_Fiber optic=1,0.155,Offer 1-year plan with discount
+2034-GDRCN,Month-to-month,0.913,Contract_Two year=0,0.217,tenure <= 9.00,0.175,SatisfactionScore <= 5.00,0.163,Senior agent callback
+8445-DNBAE,Month-to-month,0.912,Contract_Two year=0,0.217,tenure <= 9.00,0.2,SatisfactionScore <= 5.00,0.174,Senior agent callback
+8380-PEFPE,Month-to-month,0.912,tenure <= 9.00,0.189,Contract_Two year=0,0.179,SatisfactionScore <= 5.00,0.151,Senior agent callback
+0679-IDSTG,Month-to-month,0.912,Contract_Two year=0,0.205,tenure <= 9.00,0.176,InternetService_Fiber optic=1,0.173,Offer 1-year plan with discount
+6319-IEJWJ,Month-to-month,0.912,Contract_Two year=0,0.183,SatisfactionScore <= 5.00,0.164,InternetService_Fiber optic=1,0.161,Senior agent callback
+5228-EXCET,Month-to-month,0.912,Contract_Two year=0,0.208,SatisfactionScore <= 5.00,0.166,InternetService_Fiber optic=1,0.156,Senior agent callback
+9804-ICWBG,Month-to-month,0.912,tenure <= 9.00,0.195,Contract_Two year=0,0.194,InternetService_Fiber optic=1,0.165,Offer 1-year plan with discount
+5052-PNLOS,Month-to-month,0.912,Contract_Two year=0,0.216,tenure <= 9.00,0.196,SatisfactionScore <= 5.00,0.155,Senior agent callback
+0432-CAJZV,Month-to-month,0.911,Contract_Two year=0,0.199,tenure <= 9.00,0.179,SatisfactionScore <= 5.00,0.173,Senior agent callback
+7130-VTEWQ,Month-to-month,0.911,tenure <= 9.00,0.207,Contract_Two year=0,0.194,SatisfactionScore <= 5.00,0.164,Senior agent callback
+0506-LVNGN,Month-to-month,0.911,Contract_Two year=0,0.214,tenure <= 9.00,0.189,InternetService_Fiber optic=1,0.183,Offer 1-year plan with discount
+1320-HTRDR,Month-to-month,0.91,tenure <= 9.00,0.213,Contract_Two year=0,0.19,SatisfactionScore <= 5.00,0.165,Senior agent callback
+8266-VBFQL,Month-to-month,0.91,tenure <= 9.00,0.199,Contract_Two year=0,0.193,InternetService_Fiber optic=1,0.158,Offer 1-year plan with discount
+1448-PWKYE,Month-to-month,0.91,Contract_Two year=0,0.199,tenure <= 9.00,0.188,InternetService_Fiber optic=1,0.157,Offer 1-year plan with discount
+5376-DEQCP,Month-to-month,0.909,Contract_Two year=0,0.184,SatisfactionScore <= 5.00,0.171,tenure <= 9.00,0.157,Senior agent callback
+6000-APYLU,Month-to-month,0.908,Contract_Two year=0,0.202,tenure <= 9.00,0.191,SatisfactionScore <= 5.00,0.165,Senior agent callback
+1980-KXVPM,Month-to-month,0.908,Contract_Two year=0,0.222,tenure <= 9.00,0.203,InternetService_Fiber optic=1,0.158,Offer 1-year plan with discount
+2386-LAHRK,Month-to-month,0.908,tenure <= 9.00,0.225,Contract_Two year=0,0.186,SatisfactionScore <= 5.00,0.13,Senior agent callback
+5339-PXDVH,Month-to-month,0.906,Contract_Two year=0,0.205,tenure <= 9.00,0.185,InternetService_Fiber optic=1,0.164,Offer 1-year plan with discount
+3030-YDNRM,Month-to-month,0.906,tenure <= 9.00,0.211,Contract_Two year=0,0.201,InternetService_Fiber optic=1,0.164,Offer 1-year plan with discount
+3063-QFSZL,Month-to-month,0.906,Contract_Two year=0,0.22,tenure <= 9.00,0.2,SatisfactionScore <= 5.00,0.184,Senior agent callback
+0685-MLYYM,Month-to-month,0.905,tenure <= 9.00,0.201,Contract_Two year=0,0.197,InternetService_Fiber optic=1,0.166,Offer 1-year plan with discount
+9741-YLNTD,Month-to-month,0.905,tenure <= 9.00,0.202,Contract_Two year=0,0.184,InternetService_Fiber optic=1,0.161,Offer 1-year plan with discount
+9717-QEBGU,Month-to-month,0.905,tenure <= 9.00,0.191,Contract_Two year=0,0.191,InternetService_Fiber optic=1,0.169,Offer 1-year plan with discount
+2027-FECZV,Month-to-month,0.905,Contract_Two year=0,0.21,InternetService_Fiber optic=1,0.151,SatisfactionScore <= 5.00,0.149,Senior agent callback
+6821-BUXUX,Month-to-month,0.905,Contract_Two year=0,0.212,InternetService_Fiber optic=1,0.17,SatisfactionScore <= 5.00,0.168,Senior agent callback
+2959-MJHIC,Month-to-month,0.904,Contract_Two year=0,0.209,InternetService_Fiber optic=1,0.18,tenure <= 9.00,0.178,Offer 1-year plan with discount
+3750-CKVKH,Month-to-month,0.904,tenure <= 9.00,0.193,Contract_Two year=0,0.184,InternetService_Fiber optic=1,0.147,Offer 1-year plan with discount
+7409-KIUTL,Month-to-month,0.903,tenure <= 9.00,0.199,Contract_Two year=0,0.19,InternetService_Fiber optic=1,0.165,Offer 1-year plan with discount
+4317-VTEOA,Month-to-month,0.903,Contract_Two year=0,0.211,tenure <= 9.00,0.196,SatisfactionScore <= 5.00,0.153,Senior agent callback
+9050-QLROH,Month-to-month,0.903,Contract_Two year=0,0.186,SatisfactionScore <= 5.00,0.178,InternetService_Fiber optic=1,0.168,Senior agent callback
+2867-UIMSS,Month-to-month,0.903,Contract_Two year=0,0.184,tenure <= 9.00,0.183,SatisfactionScore <= 5.00,0.163,Senior agent callback
+0958-YHXGP,Month-to-month,0.903,Contract_Two year=0,0.202,InternetService_Fiber optic=1,0.195,tenure <= 9.00,0.186,Offer 1-year plan with discount
+8161-QYMTT,Month-to-month,0.902,Contract_Two year=0,0.198,tenure <= 9.00,0.196,InternetService_Fiber optic=1,0.162,Offer 1-year plan with discount
+9227-LUNBG,Month-to-month,0.902,Contract_Two year=0,0.212,tenure <= 9.00,0.192,MonthlyCharges <= 35.66,0.158,Bill review call + discount offer
+4735-ASGMA,Month-to-month,0.902,Contract_Two year=0,0.207,SatisfactionScore <= 5.00,0.156,InternetService_Fiber optic=1,0.139,Senior agent callback
+2737-YNGYW,Month-to-month,0.902,Contract_Two year=0,0.2,tenure <= 9.00,0.195,SatisfactionScore <= 5.00,0.142,Senior agent callback
+6979-ZNSFF,Month-to-month,0.902,tenure <= 9.00,0.206,Contract_Two year=0,0.185,InternetService_Fiber optic=1,0.166,Offer 1-year plan with discount
+8375-DKEBR,Month-to-month,0.902,tenure <= 9.00,0.216,Contract_Two year=0,0.191,InternetService_Fiber optic=1,0.143,Offer 1-year plan with discount
+8739-XNIKG,Month-to-month,0.9,Contract_Two year=0,0.213,tenure <= 9.00,0.192,InternetService_Fiber optic=1,0.173,Offer 1-year plan with discount
+7534-BFESC,Month-to-month,0.9,Contract_Two year=0,0.192,InternetService_Fiber optic=1,0.175,SatisfactionScore <= 5.00,0.159,Senior agent callback
+9576-ANLXO,Month-to-month,0.9,tenure <= 9.00,0.194,Contract_Two year=0,0.191,InternetService_Fiber optic=1,0.159,Offer 1-year plan with discount
+6230-BSUXY,Month-to-month,0.9,Contract_Two year=0,0.218,tenure <= 9.00,0.196,SatisfactionScore <= 5.00,0.161,Senior agent callback
+3966-HRMZA,Month-to-month,0.9,Contract_Two year=0,0.204,tenure <= 9.00,0.201,SatisfactionScore <= 5.00,0.158,Senior agent callback
+7209-JCUDS,Month-to-month,0.899,Contract_Two year=0,0.209,InternetService_Fiber optic=1,0.161,Contract_One year=0,0.079,Offer 1-year plan with discount
+0258-NOKBL,Month-to-month,0.899,Contract_Two year=0,0.208,tenure <= 9.00,0.193,InternetService_Fiber optic=1,0.166,Offer 1-year plan with discount
+2025-JKFWI,Month-to-month,0.899,Contract_Two year=0,0.199,InternetService_Fiber optic=1,0.171,SatisfactionScore <= 5.00,0.164,Senior agent callback
+1112-CUNAO,Month-to-month,0.899,Contract_Two year=0,0.19,InternetService_Fiber optic=1,0.162,SatisfactionScore <= 5.00,0.147,Senior agent callback
+3422-LYEPQ,Month-to-month,0.898,Contract_Two year=0,0.209,tenure <= 9.00,0.187,SatisfactionScore <= 5.00,0.174,Senior agent callback
+6969-MVBAI,Month-to-month,0.898,tenure <= 9.00,0.22,Contract_Two year=0,0.2,InternetService_Fiber optic=1,0.158,Offer 1-year plan with discount
+5542-TBBWB,Month-to-month,0.897,tenure <= 9.00,0.218,Contract_Two year=0,0.195,InternetService_Fiber optic=1,0.171,Offer 1-year plan with discount
